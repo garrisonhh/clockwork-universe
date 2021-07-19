@@ -1,0 +1,115 @@
+{
+	"textures": [
+		{
+			"name": "dark",
+			"path": "blocks/dark.png",
+			"type": "voxel"
+		},
+		{
+			"name": "dirt",
+			"path": "blocks/dirt.png",
+			"type": "voxel",
+			"connected-tags": ["tree"]
+		},
+		{
+			"name": "grass",
+			"path": "blocks/grass.png",
+			"type": "voxel",
+			"connected-tags": ["tree"]
+		},
+		{
+			"name": "stone",
+			"path": "blocks/stone.png",
+			"type": "voxel"
+		},
+
+		{
+			"name": "bush",
+			"path": "blocks/bush.png",
+			"type": "texture",
+			"transparent": true
+		},
+
+		{
+			"name": "tree trunk",
+			"path": "blocks/tree_trunk.png",
+			"type": "connected",
+			"transparent": true,
+			"connected-tags": ["tree"]
+		},
+		{
+			"name": "leaves",
+			"path": "blocks/leaves.png",
+			"type": "connected",
+			"transparent": false,
+			"connected-tags": ["tree"]
+		},
+
+		{
+			"name": "tall grass",
+			"path": "blocks/tall_grass.png",
+			"type": "sheet",
+			"transparent": true
+		},
+		{
+			"name": "flower",
+			"path": "blocks/flower.png",
+			"type": "sheet",
+			"transparent": true
+		},
+		{
+			"name": "rocks",
+			"path": "blocks/rocks.png",
+			"type": "sheet",
+			"transparent": true
+		}
+	],
+
+	"sprites": [
+		{
+			"name": "compass",
+			"path": "ui/compass.png",
+			"type": "static",
+			"size": [28, 19]
+		},
+
+		{
+			"name": "harry_body",
+			"path": "harry/harry_body.png",
+			"type": "human-body",
+			"size": [13, 19],
+			"anim-lengths": [1, 1, 1, 1, 6, 6, 6, 6]
+		},
+		{
+			"name": "harry_back",
+			"path": "harry/harry_back.png",
+			"type": "human-hands",
+			"size": [13, 19],
+			"anim-lengths": [1, 1, 1, 1, 6, 6, 6, 6]
+		},
+		{
+			"name": "harry_front",
+			"path": "harry/harry_front.png",
+			"type": "human-hands",
+			"size": [13, 19],
+			"anim-lengths": [1, 1, 1, 1, 6, 6, 6, 6]
+		},
+		{
+			"name": "axe_back",
+			"path": "tools/axe/axe_back.png",
+			"type": "human-tool",
+			"size": [25, 25],
+			"offset": [0, 3],
+			"anim-lengths": [1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6]
+		},
+		{
+			"name": "axe_front",
+			"path": "tools/axe/axe_front.png",
+			"type": "human-tool",
+			"size": [25, 25],
+			"offset": [0, 3],
+			"anim-lengths": [1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6]
+		}
+
+	]
+}
