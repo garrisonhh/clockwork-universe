@@ -189,24 +189,24 @@ int batch_atlas_add_lower(texture_t *texture, bool sheet, vec2 cell_size) {
 	return this_index;
 }
 
-int batch_atlas_add_texture(const char *name, const char *filename) {
-	int ref = batch_atlas_add_lower(texture_create(filename), false, GLM_VEC2_ZERO);
+void map_ref(const char *name, int ref) {
     int *ref_ptr = malloc(sizeof(*ref_ptr));
 
     *ref_ptr = ref;
 
     hashmap_set(atlas_ref_map, (char *)name, ref_ptr);
+}
+
+int batch_atlas_add_texture(const char *name, const char *filename) {
+	int ref = batch_atlas_add_lower(texture_create(filename), false, GLM_VEC2_ZERO);
+    map_ref(name, ref);
 
     return ref;
 }
 
 int batch_atlas_add_sheet(const char *name, const char *filename, vec2 cell_size) {
 	int ref = batch_atlas_add_lower(texture_create(filename), true, cell_size);
-    int *ref_ptr = malloc(sizeof(*ref_ptr));
-
-    *ref_ptr = ref;
-
-    hashmap_set(atlas_ref_map, (char *)name, ref_ptr);
+    map_ref(name, ref);
 
     return ref;
 }
@@ -234,59 +234,20 @@ void batch_atlas_generate() {
 	atlas_size[1] = atlas->h;
 
 	// blit all textures
-	glGenFramebuffers(1, &atlas_fbo);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, atlas_fbo);
-
-	glFramebufferTexture2D(
-		GL_DRAW_FRAMEBUFFER,
-		GL_COLOR_ATTACHMENT0,
-		GL_TEXTURE_2D,
-		atlas->texture,
-		0
-	);
-
-	if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		ERROR0("draw framebuffer error\n");
-
-	glGenFramebuffers(1, &tex_fbo);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, tex_fbo);
+    texture_fbo_generate(atlas);
+    gfx_bind_target(atlas);
 
 	for (i = 0; i < array_size(atlas_ctx.textures); ++i) {
 		tex = array_get(atlas_ctx.textures, i);
-		packet = array_get(atlas_ctx.packets, i);
+        packet = array_get(atlas_ctx.packets, i);
 
-		glFramebufferTexture2D(
-			GL_READ_FRAMEBUFFER,
-			GL_COLOR_ATTACHMENT0,
-			GL_TEXTURE_2D,
-			tex->texture,
-			0
-		);
-
-		if (glCheckFramebufferStatus(GL_READ_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			printf("read framebuffer error\n");
-			exit(-1);
-		}
-
-		// params get cast to int
-		glBlitFramebuffer(
-			0, 0, tex->w, tex->h,
-			packet->pos[0], packet->pos[1],
-			packet->pos[0] + packet->size[0], packet->pos[1] + packet->size[1],
-			GL_COLOR_BUFFER_BIT, GL_NEAREST
-		);
-
-		if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			printf("framebuffer blit error\n");
-			exit(-1);
-		}
+        texture_fbo_generate(tex);
+        gfx_blit(tex, packet->pos, packet->size);
+        texture_fbo_delete(tex);
 	}
 
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-
-	glDeleteFramebuffers(1, &atlas_fbo);
-	glDeleteFramebuffers(1, &tex_fbo);
+    gfx_unbind_target();
+    texture_fbo_delete(atlas);
 
 	// store references
 	num_atlas_refs = atlas_ctx.index;

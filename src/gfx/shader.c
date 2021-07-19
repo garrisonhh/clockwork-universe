@@ -51,17 +51,14 @@ void shader_attach(shader_t *shader, const char *filename, shader_types_e type) 
 }
 
 void shader_compile(shader_t *shader) {
-	if (!shader->attached)
-		ERROR0("no shader sources attached to shader, cannot compile.\n");
-
 	for (int i = 0; i < NUM_SHADER_TYPES; ++i)
 		if (BIT_GET(shader->attached, i))
 			GL(glAttachShader(shader->program, shader->shaders[i]));
 
-	GL(glLinkProgram(shader->program));
+	glLinkProgram(shader->program);
 	check_shader(shader->program, GL_LINK_STATUS, true, "program linking failed");
 
-	GL(glValidateProgram(shader->program));
+	glValidateProgram(shader->program);
 	check_shader(shader->program, GL_VALIDATE_STATUS, true, "program validation failed");
 }
 
@@ -71,10 +68,6 @@ GLint shader_uniform_location(shader_t *shader, const char *var) {
 
 void shader_bind(shader_t *shader) {
 	GL(glUseProgram(shader->program));
-
-#ifdef DEBUG
-	check_shader(shader->program, GL_VALIDATE_STATUS, true, "shader validation failed on bind");
-#endif
 }
 
 GLuint load_shader(const char *filename, GLenum shader_type) {
@@ -87,15 +80,12 @@ GLuint load_shader(const char *filename, GLenum shader_type) {
 
 	GL(shader = glCreateShader(shader_type));
 
-	if (shader == 0)
-		ERROR0("shader creation failed.\n");
-
 	shader_src[0] = text;
 	shader_src_lengths[0] = strlen(text);
 
 	GL(glShaderSource(shader, num_sources, shader_src, shader_src_lengths));
-	GL(glCompileShader(shader));
 
+	glCompileShader(shader);
 	check_shader(shader, GL_COMPILE_STATUS, false, "shader compilation failed");
 
 	free(text);

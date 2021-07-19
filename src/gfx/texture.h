@@ -17,9 +17,8 @@ void texture_destroy(texture_t *);
 void texture_bind(texture_t *, int unit);
 
 // framebuffer stuff
+// to be used in combination with gfx_bind_target() and gfx_blit()
 void texture_fbo_generate(texture_t *);
 void texture_fbo_delete(texture_t *);
-
-//void texture_fbo_blit(texture_t *dest, texture_t *src, vec2 pos);
 
 #endif

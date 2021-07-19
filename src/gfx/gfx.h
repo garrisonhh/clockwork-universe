@@ -26,19 +26,24 @@ in order to work properly, you need to:
 void gfx_init(const char *name, int width, int height);
 void gfx_quit(void);
 
-void gfx_bind_render_target(texture_t *);
-void gfx_unbind_render_target(void);
-void gfx_draw_texture(texture_t *);
 void gfx_clear(float r, float g, float b, float a);
 void gfx_flip(void);
 void gfx_on_resize(void);
 
-void gfx_set_size(vec2 size);
-void gfx_set_camera(vec2 camera);
+void gfx_bind_target(texture_t *);
+void gfx_unbind_target(void);
+// draws onto current render target at vec2 destination pos and size
+// if pos is NULL, defaults to {0.0, 0.0}
+// if size is NULL, defaults to {texture->w, texture->h}
+// TODO alpha blend on blit
+void gfx_blit(texture_t *, float *pos, float *size);
 
 bool gfx_get_fbo_bound(void);
 float gfx_get_aspect(void);
 void gfx_get_size(vec2 out_size);
 void gfx_get_camera(vec2 out_camera);
+
+void gfx_set_size(vec2 size);
+void gfx_set_camera(vec2 camera);
 
 #endif

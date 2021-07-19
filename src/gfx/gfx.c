@@ -58,14 +58,10 @@ void gfx_quit() {
 	SDL_DestroyWindow(window);
 }
 
-void gfx_bind_render_target(texture_t *texture) {
+void gfx_bind_target(texture_t *texture) {
 	const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
 
 	GL(glBindFramebuffer(GL_FRAMEBUFFER, texture->fbo));
-
-	if (!glIsFramebuffer(texture->fbo))
-		ERROR0("must generate texture fbo before binding as render target.\n");
-
 	GL(glFramebufferTexture2D(
 		GL_FRAMEBUFFER,
 		GL_COLOR_ATTACHMENT0,
@@ -76,15 +72,12 @@ void gfx_bind_render_target(texture_t *texture) {
 
 	GL(glDrawBuffers(1, draw_buffers));
 
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		ERROR0("render target binding error.\n");
-
 	fbo_bound = true;
 
 	gfx_set_size((vec2){texture->w, texture->h});
 }
 
-void gfx_unbind_render_target(void) {
+void gfx_unbind_target(void) {
 	GL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 
 	fbo_bound = false;
@@ -93,9 +86,13 @@ void gfx_unbind_render_target(void) {
 	gfx_on_resize();
 }
 
-void gfx_draw_texture(texture_t *texture) {
-	if (!glIsFramebuffer(texture->fbo))
-		ERROR0("can't blit unbuffered textures.\n");
+void gfx_blit(texture_t *texture, float *in_pos, float *in_size) {
+	vec2 pos = {0.0, 0.0}, size = {texture->w, texture->h};
+
+	if (in_pos != NULL)
+		glm_vec2_copy(in_pos, pos);
+	if (in_size != NULL)
+		glm_vec2_copy(in_size, size);
 
 	GL(glBindFramebuffer(GL_READ_FRAMEBUFFER, texture->fbo));
 	GL(glFramebufferTexture2D(
@@ -105,19 +102,11 @@ void gfx_draw_texture(texture_t *texture) {
 		texture->texture,
 		0
 	));
-
-	if (glCheckFramebufferStatus(GL_READ_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		ERROR0("blit src framebuffer error\n");
-
 	GL(glBlitFramebuffer(
 		0.0, 0.0, texture->w, texture->h,
-		0.0, 0.0, width, height,
+		pos[0], pos[1], pos[0] + size[0], pos[1] + size[1],
 		GL_COLOR_BUFFER_BIT, GL_NEAREST
 	));
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		ERROR0("blitting framebuffer error\n");
-
 	GL(glBindFramebuffer(GL_READ_FRAMEBUFFER, 0));
 }
 
