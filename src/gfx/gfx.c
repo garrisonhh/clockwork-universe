@@ -4,6 +4,7 @@
 #include <cglm/cglm.h>
 #include <ghh/utils.h>
 #include <stdio.h>
+
 #include "gfx.h"
 #include "shader.h"
 
@@ -44,8 +45,8 @@ void gfx_init(const char *name, int width, int height) {
 	if (SDL_GL_SetSwapInterval(-1))
 		SDL_GL_SetSwapInterval(1);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL(glEnable(GL_BLEND));
+	GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 	// gfx vars init
 	fbo_bound = false;
@@ -54,27 +55,27 @@ void gfx_init(const char *name, int width, int height) {
 }
 
 void gfx_quit() {
-	SDL_GL_DeleteContext(gl_ctx);
+	GL(SDL_GL_DeleteContext(gl_ctx));
 	SDL_DestroyWindow(window);
 }
 
 void gfx_bind_render_target(texture_t *texture) {
 	const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
 
-	glBindFramebuffer(GL_FRAMEBUFFER, texture->fbo);
+	GL(glBindFramebuffer(GL_FRAMEBUFFER, texture->fbo));
 
 	if (!glIsFramebuffer(texture->fbo))
 		ERROR0("must generate texture fbo before binding as render target.\n");
 
-	glFramebufferTexture2D(
+	GL(glFramebufferTexture2D(
 		GL_FRAMEBUFFER,
 		GL_COLOR_ATTACHMENT0,
 		GL_TEXTURE_2D,
 		texture->texture,
 		0
-	);
+	));
 
-	glDrawBuffers(1, draw_buffers);
+	GL(glDrawBuffers(1, draw_buffers));
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		ERROR0("render target binding error.\n");
@@ -85,7 +86,7 @@ void gfx_bind_render_target(texture_t *texture) {
 }
 
 void gfx_unbind_render_target(void) {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	GL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 
 	fbo_bound = false;
 
@@ -97,33 +98,33 @@ void gfx_draw_texture(texture_t *texture) {
 	if (!glIsFramebuffer(texture->fbo))
 		ERROR0("can't blit unbuffered textures.\n");
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, texture->fbo);
-	glFramebufferTexture2D(
+	GL(glBindFramebuffer(GL_READ_FRAMEBUFFER, texture->fbo));
+	GL(glFramebufferTexture2D(
 		GL_READ_FRAMEBUFFER,
 		GL_COLOR_ATTACHMENT0,
 		GL_TEXTURE_2D,
 		texture->texture,
 		0
-	);
+	));
 
 	if (glCheckFramebufferStatus(GL_READ_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		ERROR0("blit src framebuffer error\n");
 
-	glBlitFramebuffer(
+	GL(glBlitFramebuffer(
 		0.0, 0.0, texture->w, texture->h,
 		0.0, 0.0, width, height,
 		GL_COLOR_BUFFER_BIT, GL_NEAREST
-	);
+	));
 
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		ERROR0("blitting framebuffer error\n");
 
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	GL(glBindFramebuffer(GL_READ_FRAMEBUFFER, 0));
 }
 
 void gfx_clear(float r, float g, float b, float a) {
-	glClearColor(r, g, b, a);
-	glClear(GL_COLOR_BUFFER_BIT);
+	GL(glClearColor(r, g, b, a));
+	GL(glClear(GL_COLOR_BUFFER_BIT));
 }
 
 void gfx_flip() {
@@ -145,7 +146,7 @@ void gfx_set_size(vec2 size) {
 	height = size[1];
 
 	aspect = (float)width / (float)height;
-	glViewport(0, 0, width, height);
+	GL(glViewport(0, 0, width, height));
 
 	glm_vec2_scale((vec2){width, height}, 0.5, min_margin);
 	glm_vec2_sub(bounds, min_margin, max_margin);
@@ -153,16 +154,16 @@ void gfx_set_size(vec2 size) {
 
 void gfx_set_camera(vec2 camera) {
 	for (int i = 0; i < 2; ++i) {
-		camera[i] = glm_clamp(
+		GL(camera[i] = glm_clamp(
 			camera[i],
 			min_margin[i],
 			max_margin[i]
-		);
+		));
 	}
 }
 
 void gfx_set_bounds(vec2 bounds) {
-	glm_vec2_copy(bounds, bounds);
+	GL(glm_vec2_copy(bounds, bounds));
 
 	gfx_on_resize();
 }

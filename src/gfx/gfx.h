@@ -4,14 +4,13 @@
 #include <cglm/cglm.h>
 #include <stdbool.h>
 #include <ghh/utils.h>
+
 #include "texture.h"
 
 #ifdef DEBUG
-#define GL_DO(line) do {line;if(glGetError() != GL_NO_ERROR) ERROR0("OpenGL error!")} while(0)
-#define GL(line) do {gl##line;if(glGetError() != GL_NO_ERROR) ERROR0("OpenGL error!")} while(0)
+#define GL(line) do {line;if(glGetError() != GL_NO_ERROR) ERROR0("OpenGL error!");} while(0)
 #else
-#define GL_DO(line) line
-#define GL(line) gl##line
+#define GL(line) line
 #endif
 
 /*

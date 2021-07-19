@@ -5,6 +5,7 @@
 #include <ghh/utils.h>
 #include <ghh/io.h>
 
+#include "gfx.h"
 #include "shader.h"
 
 // maps to shader_types_e enum
@@ -26,7 +27,7 @@ GLuint load_shader(const char *filename, GLenum shader_type);
 shader_t *shader_create() {
 	shader_t *shader = malloc(sizeof(*shader));
 
-	shader->program = glCreateProgram();
+	GL(shader->program = glCreateProgram());
 	shader->attached = 0;
 
 	return shader;
@@ -35,12 +36,12 @@ shader_t *shader_create() {
 void shader_destroy(shader_t *shader) {
 	for (int i = 0; i < NUM_SHADER_TYPES; ++i) {
 		if (BIT_GET(shader->attached, i)) {
-			glDetachShader(shader->program, shader->shaders[i]);
-			glDeleteShader(shader->shaders[i]);
+			GL(glDetachShader(shader->program, shader->shaders[i]));
+			GL(glDeleteShader(shader->shaders[i]));
 		}
 	}
 
-	glDeleteProgram(shader->program);
+	GL(glDeleteProgram(shader->program));
 	free(shader);
 }
 
@@ -55,12 +56,12 @@ void shader_compile(shader_t *shader) {
 
 	for (int i = 0; i < NUM_SHADER_TYPES; ++i)
 		if (BIT_GET(shader->attached, i))
-			glAttachShader(shader->program, shader->shaders[i]);
+			GL(glAttachShader(shader->program, shader->shaders[i]));
 
-	glLinkProgram(shader->program);
+	GL(glLinkProgram(shader->program));
 	check_shader(shader->program, GL_LINK_STATUS, true, "program linking failed");
 
-	glValidateProgram(shader->program);
+	GL(glValidateProgram(shader->program));
 	check_shader(shader->program, GL_VALIDATE_STATUS, true, "program validation failed");
 }
 
@@ -69,7 +70,7 @@ GLint shader_uniform_location(shader_t *shader, const char *var) {
 }
 
 void shader_bind(shader_t *shader) {
-	glUseProgram(shader->program);
+	GL(glUseProgram(shader->program));
 
 #ifdef DEBUG
 	check_shader(shader->program, GL_VALIDATE_STATUS, true, "shader validation failed on bind");
@@ -77,12 +78,14 @@ void shader_bind(shader_t *shader) {
 }
 
 GLuint load_shader(const char *filename, GLenum shader_type) {
-	GLuint shader = glCreateShader(shader_type);
+	GLuint shader;
 	char *text = load_text_file(filename);
 
 	const int num_sources = 1;
 	const GLchar *shader_src[num_sources];
 	GLint shader_src_lengths[num_sources];
+
+	GL(shader = glCreateShader(shader_type));
 
 	if (shader == 0)
 		ERROR0("shader creation failed.\n");
@@ -90,8 +93,8 @@ GLuint load_shader(const char *filename, GLenum shader_type) {
 	shader_src[0] = text;
 	shader_src_lengths[0] = strlen(text);
 
-	glShaderSource(shader, num_sources, shader_src, shader_src_lengths);
-	glCompileShader(shader);
+	GL(glShaderSource(shader, num_sources, shader_src, shader_src_lengths));
+	GL(glCompileShader(shader));
 
 	check_shader(shader, GL_COMPILE_STATUS, false, "shader compilation failed");
 
@@ -105,15 +108,15 @@ void check_shader(GLuint handle, GLuint flags, bool is_program, const char *msg)
 	GLchar error[1024] = "";
 
 	if (is_program)
-		glGetProgramiv(handle, flags, &success);
+		GL(glGetProgramiv(handle, flags, &success));
 	else
-		glGetShaderiv(handle, flags, &success);
+		GL(glGetShaderiv(handle, flags, &success));
 
 	if (!success) {
 		if (is_program)
-			glGetProgramInfoLog(handle, sizeof(error), NULL, error);
+			GL(glGetProgramInfoLog(handle, sizeof(error), NULL, error));
 		else
-			glGetShaderInfoLog(handle, sizeof(error), NULL, error);
+			GL(glGetShaderInfoLog(handle, sizeof(error), NULL, error));
 
 		ERROR("%s:\n%s\n", msg, error);
 	}
