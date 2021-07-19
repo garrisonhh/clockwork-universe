@@ -215,7 +215,6 @@ void batch_atlas_generate() {
 	int i, x, y;
 	int idx;
 	int atlas_w = 0, atlas_h = 0;
-	GLuint atlas_fbo, tex_fbo;
 	texture_t *tex;
 	atlas_packet_t *packet;
 

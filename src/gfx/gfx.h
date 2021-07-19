@@ -7,10 +7,33 @@
 
 #include "texture.h"
 
+// OpenGL debug macro
 #ifdef DEBUG
-#define GL(line) do {line;if(glGetError() != GL_NO_ERROR) ERROR0("OpenGL error!");} while(0)
+
+static inline const char *gl_error_message(GLenum got_error) {
+#define X(x) case x: return #x "\n"
+    switch (got_error) {
+    X(GL_INVALID_ENUM);
+    X(GL_INVALID_VALUE);
+    X(GL_INVALID_OPERATION);
+    X(GL_INVALID_FRAMEBUFFER_OPERATION);
+    X(GL_OUT_OF_MEMORY);
+    default: return "no error...? GL() is broken\n";
+    }
+#undef X
+}
+
+#define GL(line) do {\
+    line;\
+    GLenum got_error;\
+    if ((got_error = glGetError()) != GL_NO_ERROR)\
+        ERROR0(gl_error_message(got_error));\
+} while(0)
+
 #else
+
 #define GL(line) line
+
 #endif
 
 /*
@@ -33,8 +56,8 @@ void gfx_on_resize(void);
 void gfx_bind_target(texture_t *);
 void gfx_unbind_target(void);
 // draws onto current render target at vec2 destination pos and size
-// if pos is NULL, defaults to {0.0, 0.0}
-// if size is NULL, defaults to {texture->w, texture->h}
+// if pos is NULL, defaults to (vec2){0.0, 0.0}
+// if size is NULL, defaults to (vec2){texture->w, texture->h}
 // TODO alpha blend on blit
 void gfx_blit(texture_t *, float *pos, float *size);
 
