@@ -35,7 +35,6 @@ void gfx_on_resize(void);
 
 void gfx_set_size(vec2 size);
 void gfx_set_camera(vec2 camera);
-void gfx_set_bounds(vec2 bounds);
 
 bool gfx_get_fbo_bound(void);
 float gfx_get_aspect(void);

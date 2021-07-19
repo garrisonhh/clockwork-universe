@@ -13,8 +13,7 @@ SDL_GLContext *gl_ctx;
 
 int width, height;
 float aspect;
-vec2 camera, bounds;
-vec2 min_margin, max_margin;
+vec2 camera;
 bool fbo_bound;
 
 void gfx_init(const char *name, int width, int height) {
@@ -147,25 +146,10 @@ void gfx_set_size(vec2 size) {
 
 	aspect = (float)width / (float)height;
 	GL(glViewport(0, 0, width, height));
-
-	glm_vec2_scale((vec2){width, height}, 0.5, min_margin);
-	glm_vec2_sub(bounds, min_margin, max_margin);
 }
 
-void gfx_set_camera(vec2 camera) {
-	for (int i = 0; i < 2; ++i) {
-		GL(camera[i] = glm_clamp(
-			camera[i],
-			min_margin[i],
-			max_margin[i]
-		));
-	}
-}
-
-void gfx_set_bounds(vec2 bounds) {
-	GL(glm_vec2_copy(bounds, bounds));
-
-	gfx_on_resize();
+void gfx_set_camera(vec2 in_camera) {
+	glm_vec2_copy(in_camera, camera);
 }
 
 bool gfx_get_fbo_bound() {

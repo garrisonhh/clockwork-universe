@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <ghh/utils.h>
+
 #include "texture.h"
 #include "gfx.h"
 
@@ -114,12 +115,11 @@ void texture_fbo_blit(texture_t *dst, texture_t *src, vec2 pos) {
 		0
 	));
 
+	if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		ERROR0("blit dst framebuffer failed.\n");
 
-	GL(if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		ERROR0("blit dst framebuffer failed.\n"));
-
-	GL(if (glCheckFramebufferStatus(GL_READ_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		ERROR0("blit src framebuffer failed.\n"));
+	if (glCheckFramebufferStatus(GL_READ_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		ERROR0("blit src framebuffer failed.\n");
 
 	GL(glBlitFramebuffer(
 		0, 0, src->w, src->h,
@@ -128,8 +128,8 @@ void texture_fbo_blit(texture_t *dst, texture_t *src, vec2 pos) {
 		GL_COLOR_BUFFER_BIT, GL_NEAREST
 	));
 
-	GL(if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		ERROR0("texture blitting failed.n"));
+	if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		ERROR0("texture blitting failed.n");
 
 	GL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
 	GL(glBindFramebuffer(GL_READ_FRAMEBUFFER, 0));
