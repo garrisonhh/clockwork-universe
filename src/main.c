@@ -1,3 +1,6 @@
+#define GHH_MEMCHECK_ENABLED
+#include <ghh/memcheck.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
@@ -54,6 +57,7 @@ void process_events(bool *quit) {
 }
 
 void init() {
+    memcheck_init();
     gfx_init("hello world!", 1280, 800);
     draw_init();
 }
@@ -61,4 +65,5 @@ void init() {
 void cleanup() {
     draw_quit();
     gfx_quit();
+    memcheck_quit();
 }

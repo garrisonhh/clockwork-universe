@@ -1,3 +1,4 @@
+#include <ghh/memcheck.h>
 #include <ghh/array.h>
 #include <ghh/list.h>
 #include <ghh/utils.h>
@@ -22,7 +23,7 @@ typedef struct atlas_packet {
 } atlas_packet_t;
 
 atlas_context_t *atlas_context_create() {
-	atlas_context_t *ctx = malloc(sizeof(*ctx));
+	atlas_context_t *ctx = MALLOC(sizeof(*ctx));
 
 	ctx->textures = array_create(0);
 	ctx->packets = array_create(0);
@@ -50,7 +51,7 @@ void atlas_construct(atlas_t *atlas) {
 	atlas->ref_map = hashmap_create(0, -1, true);
 
 	// set up bins
-	atlas_packet_t *base_bin = malloc(sizeof(*base_bin));
+	atlas_packet_t *base_bin = MALLOC(sizeof(*base_bin));
 
 	*base_bin = (atlas_packet_t){
 		.pos = {0, 0},
@@ -63,7 +64,7 @@ void atlas_construct(atlas_t *atlas) {
 void atlas_destruct(atlas_t *atlas) {
 	texture_destroy(atlas->texture);
     hashmap_destroy(atlas->ref_map, true);
-    free(atlas->refs);
+    FREE(atlas->refs);
 }
 
 int bin_compare(const void *a, const void *b) {
@@ -82,7 +83,7 @@ int atlas_add_lower(atlas_t *atlas, const char *name, texture_t *tex, bool sheet
 	int this_index = atlas->ctx->index;
 	int *ref_ptr;
 	atlas_packet_t *bin = NULL;
-	atlas_packet_t *packet = malloc(sizeof(*packet));
+	atlas_packet_t *packet = MALLOC(sizeof(*packet));
 	atlas_packet_t *new_bins[2];
 
 	// find best bin
@@ -107,7 +108,7 @@ int atlas_add_lower(atlas_t *atlas, const char *name, texture_t *tex, bool sheet
 	array_push(atlas->ctx->packets, packet);
 	array_push(atlas->ctx->textures, tex);
 
-	ref_ptr = malloc(sizeof(*ref_ptr));
+	ref_ptr = MALLOC(sizeof(*ref_ptr));
 	*ref_ptr = this_index;
 	hashmap_set(atlas->ref_map, (char *)name, ref_ptr);
 
@@ -127,7 +128,7 @@ int atlas_add_lower(atlas_t *atlas, const char *name, texture_t *tex, bool sheet
 
 	// create new bins
 	for (int i = 0; i < 2; ++i)
-		new_bins[i] = malloc(sizeof(*new_bins[i]));
+		new_bins[i] = MALLOC(sizeof(*new_bins[i]));
 
 	if (bin->size[0] < bin->size[1]) {
 		*new_bins[0] = (atlas_packet_t){
@@ -149,7 +150,7 @@ int atlas_add_lower(atlas_t *atlas, const char *name, texture_t *tex, bool sheet
 		};
 	}
 
-	free(bin);
+	FREE(bin);
 
 	// add new bins back to bins and sort
 	for (int i = 0; i < 2; ++i)
@@ -211,7 +212,7 @@ void atlas_generate(atlas_t *atlas) {
 
 	// finalize and store references
 	atlas->num_refs = atlas->ctx->index;
-	atlas->refs = malloc(atlas->num_refs * sizeof(*atlas->refs));
+	atlas->refs = MALLOC(atlas->num_refs * sizeof(*atlas->refs));
 
 	idx = 0;
 

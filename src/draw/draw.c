@@ -1,3 +1,5 @@
+#include <ghh/memcheck.h>
+
 #include "draw.h"
 #include "batch2d.h"
 #include "../gfx/gfx.h"

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ghh/vector.h>
+#include <ghh/memcheck.h>
 
 #include "batcher.h"
 #include "gfx.h"
@@ -28,7 +29,7 @@ void batcher_destruct(batcher_t *batcher) {
     	GL(glDeleteBuffers(1, &buffer->vbo));
         VECTOR_FREE(buffer->items);
 
-        free(buffer);
+        FREE(buffer);
     }
 
     // clean up batcher
@@ -39,7 +40,7 @@ void batcher_destruct(batcher_t *batcher) {
 }
 
 void batcher_add_buffer(batcher_t *batcher, size_t item_size) {
-    batch_buffer_t *buffer = malloc(sizeof(*buffer));
+    batch_buffer_t *buffer = MALLOC(sizeof(*buffer));
 
     GL(glGenBuffers(1, &buffer->vbo));
 
