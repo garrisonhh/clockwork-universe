@@ -4,10 +4,15 @@
 #include <glad/glad.h>
 #include <stddef.h>
 
+#define SHADER_TYPES() \
+	X(SHADER_VERTEX, GL_VERTEX_SHADER)\
+	X(SHADER_GEOMETRY, GL_GEOMETRY_SHADER)\
+	X(SHADER_FRAGMENT, GL_FRAGMENT_SHADER)
+
 typedef enum shader_types {
-	SHADER_VERTEX,
-	SHADER_GEOMETRY,
-	SHADER_FRAGMENT,
+#define	X(type, gl_type) type,
+	SHADER_TYPES()
+#undef X
 
 	NUM_SHADER_TYPES
 } shader_types_e;

@@ -8,11 +8,12 @@
 #include "gfx.h"
 #include "shader.h"
 
-// maps to shader_types_e enum
+// SHADER_TYPES() defined in header
+// this just maps shader_types_e values to GLenum values
 GLenum GL_SHADER_TYPES[NUM_SHADER_TYPES] = {
-	GL_VERTEX_SHADER,
-	GL_GEOMETRY_SHADER,
-	GL_FRAGMENT_SHADER
+#define	X(type, gl_type) gl_type,
+	SHADER_TYPES()
+#undef X
 };
 
 struct shader {

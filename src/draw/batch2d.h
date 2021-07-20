@@ -1,5 +1,5 @@
-#ifndef BATCH_H
-#define BATCH_H
+#ifndef BATCH2D_H
+#define BATCH2D_H
 
 #include <cglm/cglm.h>
 #include <stddef.h>
