@@ -8,12 +8,10 @@
 #include <math.h>
 
 #include "batch2d.h"
+#include "../gfx/batcher.h"
 #include "../gfx/gfx.h"
 #include "../gfx/shader.h"
 #include "../gfx/atlas.h"
-
-// this module for 2d sprite batching
-// TODO would it be possible to generalize something like this?
 
 enum BATCH_VBOS {
 	VBO_DRAWPOS,
@@ -24,29 +22,18 @@ enum BATCH_VBOS {
 	NUM_BATCH_VBOS
 };
 
-typedef struct batch_packet {
-	atlas_ref_t *ref;
-	vec2 pos;
-} batch_packet_t;
-
 atlas_t atlas;
-shader_t *batch_shader = NULL;
-GLuint batch_vao;
-GLuint batch_vbos[NUM_BATCH_VBOS];
-array_t *batch = NULL; // batch_packet_t *
+batcher_t batcher;
 
 void batch2d_init(int batch_array_size) {
-	// init vars
-	batch_shader = shader_create();
+	batcher_construct(&batcher);
 
-	shader_attach(batch_shader, "res/shaders/batch2d_vert.glsl", SHADER_VERTEX);
-	shader_attach(batch_shader, "res/shaders/batch_frag.glsl", SHADER_FRAGMENT);
-	shader_compile(batch_shader);
+	shader_attach(batcher.shader, "res/shaders/batch2d_vert.glsl", SHADER_VERTEX);
+	shader_attach(batcher.shader, "res/shaders/batch_frag.glsl", SHADER_FRAGMENT);
+	shader_compile(batcher.shader);
 
-	GL(glGenVertexArrays(1, &batch_vao));
-	GL(glGenBuffers(NUM_BATCH_VBOS, batch_vbos));
-
-	batch = array_create(batch_array_size);
+	for (size_t i = 0; i < NUM_BATCH_VBOS; ++i)
+		batcher_add_buffer(&batcher, 2);
 
 	// load
 	atlas_construct(&atlas);
@@ -56,21 +43,16 @@ void batch2d_init(int batch_array_size) {
 
 void batch2d_quit() {
 	atlas_destruct(&atlas);
-
-	GL(glDeleteBuffers(NUM_BATCH_VBOS, batch_vbos));
-	GL(glDeleteVertexArrays(1, &batch_vao));
-
-	shader_destroy(batch_shader);
-	array_destroy(batch, false);
+	batcher_destruct(&batcher);
 }
 
 void batch2d_queue(int ref_idx, vec2 pos) {
-	batch_packet_t *packet = malloc(sizeof(*packet));
+	atlas_ref_t *ref = &atlas.refs[ref_idx];
 
-	packet->ref = atlas.refs + ref_idx;
-	glm_vec2_copy(pos, packet->pos);
-
-	array_push(batch, packet);
+	batcher_queue_attr(&batcher, VBO_DRAWPOS, pos);
+	batcher_queue_attr(&batcher, VBO_DRAWSIZE, ref->pixel_size);
+	batcher_queue_attr(&batcher, VBO_ATLASPOS, ref->pos);
+	batcher_queue_attr(&batcher, VBO_ATLASSIZE, ref->size);
 }
 
 void batch2d_queue_text(int font_idx, vec2 pos, const char *text) {
@@ -95,66 +77,30 @@ void batch2d_queue_text(int font_idx, vec2 pos, const char *text) {
 }
 
 void batch2d_draw() {
-	size_t i;
 	vec2 disp_size, camera;
 
-	shader_bind(batch_shader);
+	shader_bind(batcher.shader);
 
+	// pass in uniforms
 	gfx_get_camera(camera);
 	gfx_get_size(disp_size);
 
-	GL(glUniform2f(shader_uniform_location(batch_shader, "camera"), camera[0], camera[1]));
 	GL(glUniform2f(
-        shader_uniform_location(batch_shader, "screen_size"),
+		shader_uniform_location(batcher.shader, "camera"),
+		camera[0], camera[1]
+	));
+	GL(glUniform2f(
+        shader_uniform_location(batcher.shader, "screen_size"),
         disp_size[0], disp_size[1]
     ));
 
 	texture_bind(atlas.texture, 0);
-	GL(glUniform1i(shader_uniform_location(batch_shader, "atlas"), 0));
-
-	// process batch data
-	batch_packet_t *packet;
-	size_t batch_count = array_size(batch);
-	vec2 arrays[NUM_BATCH_VBOS][batch_count];
-
-	for (i = 0; i < batch_count; ++i) {
-		packet = array_get(batch, i);
-
-		glm_vec2_copy(packet->pos, arrays[VBO_DRAWPOS][i]);
-		glm_vec2_copy(packet->ref->pixel_size, arrays[VBO_DRAWSIZE][i]);
-		glm_vec2_copy(packet->ref->pos, arrays[VBO_ATLASPOS][i]);
-		glm_vec2_copy(packet->ref->size, arrays[VBO_ATLASSIZE][i]);
-	}
-
-	array_clear(batch, true);
-
-	// buffer batch data
-	GL(glBindVertexArray(batch_vao));
-
-	for (i = 0; i < NUM_BATCH_VBOS; ++i) {
-		GL(glBindBuffer(GL_ARRAY_BUFFER, batch_vbos[i]));
-		GL(glBufferData(GL_ARRAY_BUFFER, sizeof(arrays[i]), arrays[i], GL_STREAM_DRAW));
-
-		GL(glEnableVertexAttribArray(i));
-		GL(glVertexAttribPointer(i, 2, GL_FLOAT, GL_FALSE, 0, 0));
-		GL(glVertexAttribDivisor(i, 1));
-	}
+	GL(glUniform1i(shader_uniform_location(batcher.shader, "atlas"), 0));
 
 	// draw
-	GL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, batch_count));
-
-	// clean up
-	for (i = 0; i < NUM_BATCH_VBOS; ++i)
-		glDisableVertexAttribArray(i);
-
-	glBindVertexArray(0);
+	batcher_draw(&batcher);
 }
 
 int batch2d_get_ref(const char *name) {
-    int *ref;
-
-    if ((ref = hashmap_get(atlas.ref_map, name)) == NULL)
-        ERROR("could not find batch ref under name \"%s\".", name);
-
-    return *ref;
+	return *(int *)hashmap_get(atlas.ref_map, name);
 }

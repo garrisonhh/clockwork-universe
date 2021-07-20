@@ -56,17 +56,27 @@ void batcher_queue_attr(batcher_t *batcher, size_t buffer_idx, float *item) {
         VECTOR_PUSH(buffer->items, item[i]);
 }
 
+static inline size_t buffer_size(batcher_t *batcher, size_t buffer_idx) {
+    batch_buffer_t *buffer = array_get(batcher->buffers, buffer_idx);
+
+    return VECTOR_SIZE(buffer->items) / buffer->item_size;
+}
+
 void batcher_draw(batcher_t *batcher) {
     batch_buffer_t *buffer;
-    size_t i;
+    size_t i, num_items;
+
+    // get num items
+    if (array_size(batcher->buffers))
+        num_items = buffer_size(batcher, 0);
+    else
+        return; // zero items queued, nothing to draw
 
 #ifdef DEBUG
     // verify buffers
-    for (i = 0; i < array_size(batcher->buffers); ++i) {
-        if (VECTOR_SIZE(((batch_buffer_t *)array_get(batcher->buffers, 0))->items)
-         != VECTOR_SIZE(((batch_buffer_t *)array_get(batcher->buffers, i))->items)) {
-             ERROR("batcher buffers are not equal in size.");
-         }
+    for (i = 1; i < array_size(batcher->buffers); ++i) {
+        if (buffer_size(batcher, i) != num_items)
+             ERROR("batcher buffers are not equal in size on draw.");
     }
 #endif
 
@@ -79,7 +89,7 @@ void batcher_draw(batcher_t *batcher) {
         GL(glBindBuffer(GL_ARRAY_BUFFER, buffer->vbo));
         GL(glBufferData(
             GL_ARRAY_BUFFER,
-            buffer->item_size * sizeof(*buffer->items),
+            num_items * buffer->item_size * sizeof(*buffer->items),
             buffer->items,
             GL_STREAM_DRAW
         ));
@@ -92,7 +102,8 @@ void batcher_draw(batcher_t *batcher) {
     }
 
 	// draw
-	GL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, array_size(batcher->buffers)));
+    // TODO parameterize instancing options through batcher_construct
+	GL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, num_items));
 
 	// clean up
 	for (i = 0; i < array_size(batcher->buffers); ++i)

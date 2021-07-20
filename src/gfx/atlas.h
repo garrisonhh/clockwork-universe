@@ -17,6 +17,7 @@ typedef struct atlas {
 	atlas_context_t *ctx;
 	texture_t *texture;
 
+	// can access refs through these
 	atlas_ref_t *refs;
 	size_t num_refs;
 	hashmap_t *ref_map;
