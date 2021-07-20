@@ -27,7 +27,7 @@ void check_shader(GLuint shader, GLuint flags, bool is_program, const char *msg)
 GLuint load_shader(const char *filename, GLenum shader_type);
 
 shader_t *shader_create() {
-	shader_t *shader = MALLOC(sizeof(*shader));
+	shader_t *shader = malloc(sizeof(*shader));
 
 	GL(shader->program = glCreateProgram());
 	shader->attached = 0;
@@ -44,7 +44,7 @@ void shader_destroy(shader_t *shader) {
 	}
 
 	GL(glDeleteProgram(shader->program));
-	FREE(shader);
+	free(shader);
 }
 
 void shader_attach(shader_t *shader, const char *filename, shader_types_e type) {
@@ -90,7 +90,7 @@ GLuint load_shader(const char *filename, GLenum shader_type) {
 	glCompileShader(shader);
 	check_shader(shader, GL_COMPILE_STATUS, false, "shader compilation failed");
 
-	FREE(text);
+	free(text);
 
 	return shader;
 }

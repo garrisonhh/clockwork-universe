@@ -1,9 +1,9 @@
-#define GHH_MEMCHECK_ENABLED
-#include <ghh/memcheck.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
+
+#define GHH_MEMCHECK_ENABLED
+#include <ghh/memcheck.h>
 
 #include "gfx/gfx.h"
 #include "draw/draw.h"

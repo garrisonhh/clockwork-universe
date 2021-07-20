@@ -10,7 +10,7 @@
 #include "gfx.h"
 
 texture_t *texture_create(const char *filename) {
-	texture_t *texture = MALLOC(sizeof(*texture));
+	texture_t *texture = malloc(sizeof(*texture));
 
 	texture->fbo = 0;
 
@@ -47,7 +47,7 @@ texture_t *texture_create(const char *filename) {
 }
 
 texture_t *texture_create_empty(int w, int h) {
-	texture_t *texture = MALLOC(sizeof(*texture));
+	texture_t *texture = malloc(sizeof(*texture));
 
 	texture->w = w;
 	texture->h = h;
@@ -77,7 +77,7 @@ void texture_destroy(texture_t *texture) {
 	texture_fbo_delete(texture);
 
 	GL(glDeleteTextures(1, &texture->texture));
-	FREE(texture);
+	free(texture);
 }
 
 // unit means GL_TEXTURE0 .. 31
