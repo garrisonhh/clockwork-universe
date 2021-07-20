@@ -3,13 +3,14 @@
 #include <ghh/utils.h>
 
 #include "atlas.h"
+#include "gfx.h"
 
 // used to construct atlas
 struct atlas_context {
 	size_t index;
 	array_t *textures;
 	array_t *packets;
-	list_t *bins; // TODO use linked list for this
+	array_t *bins; // if list_t every gets a sorting algorithm, use it instead
 };
 
 // used for pixel sizes pre-atlas-generation
@@ -25,7 +26,7 @@ atlas_context_t *atlas_context_create() {
 
 	ctx->textures = array_create(0);
 	ctx->packets = array_create(0);
-	ctx->bins = list_create();
+	ctx->bins = array_create(0);
 	ctx->index = 0;
 
 	return ctx;
@@ -76,7 +77,7 @@ int bin_compare(const void *a, const void *b) {
 
 int atlas_add_lower(atlas_t *atlas, const char *name, texture_t *tex, bool sheet, vec2 cell_size) {
 	if (atlas->ctx == NULL)
-		ERROR0("cannot add to batch atlas after it has been generated.\n");
+		ERROR("cannot add to batch atlas after it has been generated.\n");
 
 	int this_index = atlas->ctx->index;
 	int *ref_ptr;
@@ -97,7 +98,7 @@ int atlas_add_lower(atlas_t *atlas, const char *name, texture_t *tex, bool sheet
 
 	// store new packet
 	*packet = (atlas_packet_t){
-		.pos = {bin->pos[0], bin->pos[1]},
+		.pos = {bin->pos[0], bin->pos[1]}, // cppcheck-suppress nullPointer
 		.size = {tex->w, tex->h},
 		.sheet = sheet,
 		.cell_size = {cell_size[0], cell_size[1]}
@@ -170,7 +171,7 @@ int atlas_add_sheet(atlas_t *atlas, const char *name, const char *filename, vec2
 
 void atlas_generate(atlas_t *atlas) {
 	if (!array_size(atlas->ctx->packets))
-		ERROR0("attempted to generate atlas with no textures added.\n");
+		ERROR("attempted to generate atlas with no textures added.\n");
 
 	int i, x, y;
 	int idx;
@@ -190,11 +191,11 @@ void atlas_generate(atlas_t *atlas) {
 			atlas_size[1] = packet->pos[1] + packet->size[1];
 	}
 
-	atlas = texture_create_empty(atlas_size[0], atlas_size[1]);
+	atlas->texture = texture_create_empty(atlas_size[0], atlas_size[1]);
 
 	// blit all textures to the atlas
-    texture_fbo_generate(atlas);
-    gfx_bind_target(atlas);
+    texture_fbo_generate(atlas->texture);
+    gfx_bind_target(atlas->texture);
 
 	for (i = 0; i < array_size(atlas->ctx->textures); ++i) {
 		tex = array_get(atlas->ctx->textures, i);
@@ -206,7 +207,7 @@ void atlas_generate(atlas_t *atlas) {
 	}
 
     gfx_unbind_target();
-    texture_fbo_delete(atlas);
+    texture_fbo_delete(atlas->texture);
 
 	// finalize and store references
 	atlas->num_refs = atlas->ctx->index;

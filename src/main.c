@@ -4,7 +4,6 @@
 
 #include "gfx/gfx.h"
 #include "draw/draw.h"
-#include "draw/batch.h"
 
 #ifdef _WIN32
 #define MAIN WinMain
@@ -13,13 +12,11 @@
 #endif
 
 void init(void);
-void load(void);
 void cleanup(void);
 void process_events(bool *quit);
 
 int MAIN(int argc, char **argv) {
     init();
-    load();
 
     bool quit = false;
 
@@ -58,19 +55,10 @@ void process_events(bool *quit) {
 
 void init() {
     gfx_init("hello world!", 1280, 800);
-    batch_init(4096);
-}
-
-void load() {
-    // atlas
-    batch_atlas_add_sheet("font", "res/fonts/CGA8x8thick.png", (vec2){8.0, 8.0});
-    batch_atlas_generate();
-
-    // uses atlas
-    draw_load();
+    draw_init();
 }
 
 void cleanup() {
-    batch_quit();
+    draw_quit();
     gfx_quit();
 }

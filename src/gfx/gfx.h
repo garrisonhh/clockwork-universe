@@ -27,7 +27,7 @@ static inline const char *gl_error_message(GLenum got_error) {
     line;\
     GLenum got_error;\
     if ((got_error = glGetError()) != GL_NO_ERROR)\
-        ERROR0(gl_error_message(got_error));\
+        ERROR(gl_error_message(got_error));\
 } while(0)
 
 #else

@@ -37,7 +37,7 @@ void gfx_init(const char *name, int width, int height) {
 		ERROR("couldn't create gl context:\n%s\n", SDL_GetError());
 
 	if (!gladLoadGLLoader(SDL_GL_GetProcAddress))
-	 	ERROR0("couldn't load opengl.\n");
+	 	ERROR("couldn't load opengl.\n");
 
 	// OpenGL config
 	// first try adaptive vsync, then normal vsync, then forget about it

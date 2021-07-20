@@ -79,10 +79,10 @@ void texture_destroy(texture_t *texture) {
 	free(texture);
 }
 
-// unit maens GL_TEXTURE0 .. 31
+// unit means GL_TEXTURE0 .. 31
 void texture_bind(texture_t *texture, int unit) {
 	if (unit > 31)
-		ERROR0("whoops, texture unit over 31.\n");
+		ERROR("whoops, texture unit over 31.\n");
 
 	GL(glActiveTexture(GL_TEXTURE0 + unit));
 	GL(glBindTexture(GL_TEXTURE_2D, texture->texture));
