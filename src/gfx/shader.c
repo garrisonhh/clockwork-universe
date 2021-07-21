@@ -9,6 +9,8 @@
 #include "gfx.h"
 #include "shader.h"
 
+// TODO add uniform abstraction
+
 // SHADER_TYPES() defined in header
 // this just maps shader_types_e values to GLenum values
 GLenum GL_SHADER_TYPES[NUM_SHADER_TYPES] = {
@@ -113,3 +115,17 @@ void check_shader(GLuint handle, GLuint flags, bool is_program, const char *msg)
 		ERROR("%s:\n%s\n", msg, error);
 	}
 }
+ void batch2d_init(int batch_array_size) {
+-       batcher_construct(&batcher);
++       batcher_construct(&batcher, GL_TRIANGLE_STRIP, 4);
+
+        shader_attach(batcher.shader, "res/shaders/batch2d_vert.glsl", SHADER_VERTEX);
+        shader_attach(batcher.shader, "res/shaders/batch_frag.glsl", SHADER_FRAGMENT);
+@@ -86,14 +86,8 @@ void batch2d_draw() {
+        gfx_get_camera(camera);
+        gfx_get_size(disp_size);
+
+-       GL(glUniform2f(
+-               shader_uniform_location(batcher.shader, "camera"),
+-               camera[0], camera[1]
+-       ));

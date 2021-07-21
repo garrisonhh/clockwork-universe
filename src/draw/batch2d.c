@@ -27,7 +27,7 @@ atlas_t atlas;
 batcher_t batcher;
 
 void batch2d_init(int batch_array_size) {
-	batcher_construct(&batcher);
+	batcher_construct(&batcher, GL_TRIANGLE_STRIP, 4);
 
 	shader_attach(batcher.shader, "res/shaders/batch2d_vert.glsl", SHADER_VERTEX);
 	shader_attach(batcher.shader, "res/shaders/batch_frag.glsl", SHADER_FRAGMENT);
@@ -86,14 +86,8 @@ void batch2d_draw() {
 	gfx_get_camera(camera);
 	gfx_get_size(disp_size);
 
-	GL(glUniform2f(
-		shader_uniform_location(batcher.shader, "camera"),
-		camera[0], camera[1]
-	));
-	GL(glUniform2f(
-        shader_uniform_location(batcher.shader, "screen_size"),
-        disp_size[0], disp_size[1]
-    ));
+	GL(glUniform2fv(shader_uniform_location(batcher.shader, "camera"), 1, camera));
+	GL(glUniform2fv(shader_uniform_location(batcher.shader, "screen_size"), 1, disp_size));
 
 	texture_bind(atlas.texture, 0);
 	GL(glUniform1i(shader_uniform_location(batcher.shader, "atlas"), 0));

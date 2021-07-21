@@ -12,9 +12,15 @@ struct batch_buffer {
     float *items; // vector
 };
 
-void batcher_construct(batcher_t *batcher) {
+void batcher_construct(batcher_t *batcher, GLenum instance_mode, GLsizei instance_count) {
+    GLint max_attrs;
+
+    GL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &max_attrs));
+
     batcher->shader = shader_create();
     batcher->buffers = array_create(0);
+    batcher->instance_mode = instance_mode;
+    batcher->instance_count = instance_count;
 
     GL(glGenVertexArrays(1, &batcher->vao));
 }
@@ -103,12 +109,16 @@ void batcher_draw(batcher_t *batcher) {
     }
 
 	// draw
-    // TODO parameterize instancing options through batcher_construct
-	GL(glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, num_items));
+	GL(glDrawArraysInstanced(
+        batcher->instance_mode,
+        0,
+        batcher->instance_count,
+        num_items
+    ));
 
 	// clean up
 	for (i = 0; i < array_size(batcher->buffers); ++i)
-		glDisableVertexAttribArray(i);
+		GL(glDisableVertexAttribArray(i));
 
-	glBindVertexArray(0);
+	GL(glBindVertexArray(0));
 }

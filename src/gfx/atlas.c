@@ -40,6 +40,7 @@ void atlas_context_destroy(atlas_context_t *ctx) {
 	array_destroy(ctx->textures, false);
 	array_destroy(ctx->packets, true);
 	array_destroy(ctx->bins, true);
+	free(ctx);
 }
 
 void atlas_construct(atlas_t *atlas) {
@@ -110,6 +111,7 @@ int atlas_add_lower(atlas_t *atlas, const char *name, texture_t *tex, bool sheet
 
 	ref_ptr = malloc(sizeof(*ref_ptr));
 	*ref_ptr = this_index;
+
 	hashmap_set(atlas->ref_map, (char *)name, ref_ptr);
 
 	// increment index

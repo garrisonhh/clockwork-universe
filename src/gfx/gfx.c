@@ -1,10 +1,10 @@
-#include <ghh/memcheck.h>
+#include <stdio.h>
 #include <glad/glad.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 #include <cglm/cglm.h>
 #include <ghh/utils.h>
-#include <stdio.h>
+#include <ghh/memcheck.h>
 
 #include "gfx.h"
 #include "shader.h"
