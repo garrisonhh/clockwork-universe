@@ -1,18 +1,12 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <glad/glad.h>
 #include <stddef.h>
 
-#define SHADER_TYPES() \
-	X(SHADER_VERTEX, GL_VERTEX_SHADER)\
-	X(SHADER_GEOMETRY, GL_GEOMETRY_SHADER)\
-	X(SHADER_FRAGMENT, GL_FRAGMENT_SHADER)
-
 typedef enum shader_types {
-#define	X(type, gl_type) type,
-	SHADER_TYPES()
-#undef X
+	SHADER_VERTEX,
+	SHADER_GEOMETRY,
+	SHADER_FRAGMENT,
 
 	NUM_SHADER_TYPES
 } shader_types_e;
@@ -33,6 +27,7 @@ void shader_compile(shader_t *);
 void shader_bind(shader_t *);
 
 // returns -1 on failure
-GLint shader_uniform_location(shader_t *, const char *var);
+// TODO use a better form of uniform updating, probably a uniform buffer object abstraction
+int shader_uniform_location(shader_t *, const char *name);
 
 #endif

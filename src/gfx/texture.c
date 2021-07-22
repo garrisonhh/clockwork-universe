@@ -91,6 +91,15 @@ void texture_bind(texture_t *texture, int unit) {
 
 void texture_fbo_generate(texture_t *texture) {
 	GL(glGenFramebuffers(1, &texture->fbo));
+	GL(glBindFramebuffer(GL_READ_FRAMEBUFFER, texture->fbo));
+	GL(glFramebufferTexture2D(
+		GL_READ_FRAMEBUFFER,
+		GL_COLOR_ATTACHMENT0,
+		GL_TEXTURE_2D,
+		texture->texture,
+		0
+	));
+	GL(glBindFramebuffer(GL_READ_FRAMEBUFFER, 0));
 }
 
 void texture_fbo_delete(texture_t *texture) {

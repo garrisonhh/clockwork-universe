@@ -15,15 +15,13 @@
 
 void init(void);
 void cleanup(void);
-void process_events(bool *quit);
+bool process_events(void);
 
 int MAIN(int argc, char **argv) {
     init();
 
-    bool quit = false;
-
-    while (!quit) {
-        process_events(&quit);
+    while (process_events()) {
+        // apply game logic()
         draw_frame();
     }
 
@@ -32,19 +30,17 @@ int MAIN(int argc, char **argv) {
     return 0;
 }
 
-void process_events(bool *quit) {
+bool process_events() {
     SDL_Event event;
 
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_QUIT:
-            *quit = true;
-            break;
+            return false;
         case SDL_KEYDOWN:
             switch (event.key.keysym.sym) {
             case SDLK_ESCAPE:
-                *quit = true;
-                break;
+                return false;
             }
             break;
         case SDL_WINDOWEVENT:
@@ -53,6 +49,8 @@ void process_events(bool *quit) {
             break;
         }
     }
+
+    return true;
 }
 
 void init() {

@@ -6,13 +6,6 @@
 
 #include "../gfx/texture.h"
 
-// to use:
-// - add() textures into atlas, storing atlas_ref pointer index
-// - generate() atlas (finalizes, no more adding to atlas)
-// - for each frame:
-//   - queue() refs to be drawn
-//   - draw() to draw batch and flush queue
-
 void batch2d_init(int batch_array_size);
 void batch2d_quit(void);
 

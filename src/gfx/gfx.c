@@ -88,6 +88,7 @@ void gfx_unbind_target(void) {
 }
 
 void gfx_blit(texture_t *texture, float *in_pos, float *in_size) {
+	// set up vars with defaults
 	vec2 pos = {0.0, 0.0}, size = {texture->w, texture->h};
 
 	if (in_pos != NULL)
@@ -95,14 +96,8 @@ void gfx_blit(texture_t *texture, float *in_pos, float *in_size) {
 	if (in_size != NULL)
 		glm_vec2_copy(in_size, size);
 
+	// bind and blit framebuffer
 	GL(glBindFramebuffer(GL_READ_FRAMEBUFFER, texture->fbo));
-	GL(glFramebufferTexture2D(
-		GL_READ_FRAMEBUFFER,
-		GL_COLOR_ATTACHMENT0,
-		GL_TEXTURE_2D,
-		texture->texture,
-		0
-	));
 	GL(glBlitFramebuffer(
 		0.0, 0.0, texture->w, texture->h,
 		pos[0], pos[1], pos[0] + size[0], pos[1] + size[1],

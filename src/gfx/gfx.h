@@ -42,7 +42,7 @@ void gfx_blit(texture_t *, float *pos, float *size);
 // OpenGL debug macro
 #ifdef DEBUG
 
-static inline const char *gl_error_message(GLenum got_error) {
+static inline const char *gfx_gl_error(GLenum got_error) {
     switch (got_error) {
 #define X(x) case x: return #x "\n"
     X(GL_INVALID_ENUM);
@@ -59,7 +59,7 @@ static inline const char *gl_error_message(GLenum got_error) {
     line;\
     GLenum got_error;\
     if ((got_error = glGetError()) != GL_NO_ERROR)\
-        ERROR(gl_error_message(got_error));\
+        ERROR(gfx_gl_error(got_error));\
 } while(0)
 
 #else

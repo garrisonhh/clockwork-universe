@@ -6,13 +6,13 @@
 #include "batcher.h"
 #include "gfx.h"
 
-struct batch_buffer {
+typedef struct batch_buffer {
     GLuint vbo;
     size_t item_size;
-    float *items; // vector
-};
+    float *items; // ghh vector
+} batch_buffer_t;
 
-void batcher_construct(batcher_t *batcher, GLenum instance_mode, GLsizei instance_count) {
+void batcher_construct(batcher_t *batcher, GLenum instance_mode, size_t instance_count) {
     GLint max_attrs;
 
     GL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &max_attrs));
