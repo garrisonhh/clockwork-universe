@@ -22,7 +22,7 @@ void batch2d_init(int batch_array_size) {
 	batcher_construct(&batcher2d, GL_TRIANGLE_STRIP, 4);
 
 	shader_attach(batcher2d.shader, "res/shaders/batch2d_vert.glsl", SHADER_VERTEX);
-	shader_attach(batcher2d.shader, "res/shaders/batch_frag.glsl", SHADER_FRAGMENT);
+	shader_attach(batcher2d.shader, "res/shaders/atlas_frag.glsl", SHADER_FRAGMENT);
 	shader_compile(batcher2d.shader);
 
 	for (size_t i = 0; i < NUM_BATCH_VBOS; ++i)

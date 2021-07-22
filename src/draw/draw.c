@@ -68,10 +68,10 @@ void draw_frame() {
 
     gfx_clear(0.0, 0.2, 0.3, 1.0);
 
-    //FOR_CUBE(pos[0], pos[1], pos[2], 0, 4)
-    //    batch3d_queue(block_ref, pos, (vec2){-16.0, -18.0});
+    FOR_CUBE(pos[0], pos[1], pos[2], 0, 4)
+        batch3d_queue(block_ref, pos, (vec2){-16.0, -18.0});
 
-    //batch3d_draw(scale);
+    batch3d_draw(scale);
 
     batch2d_queue_text(font_ref, topleft, fps_text);
     batch2d_draw();

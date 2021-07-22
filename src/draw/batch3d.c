@@ -33,7 +33,7 @@ void batch3d_init(int batch_array_size) {
 	batcher_construct(&batcher3d, GL_TRIANGLE_STRIP, 4);
 
 	shader_attach(batcher3d.shader, "res/shaders/batch3d_vert.glsl", SHADER_VERTEX);
-	shader_attach(batcher3d.shader, "res/shaders/batch_frag.glsl", SHADER_FRAGMENT);
+	shader_attach(batcher3d.shader, "res/shaders/atlas_frag.glsl", SHADER_FRAGMENT);
 	shader_compile(batcher3d.shader);
 
 	for (size_t i = 0; i < NUM_BATCH3D_VBOS; ++i)
