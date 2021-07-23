@@ -48,6 +48,9 @@ void gfx_init(const char *name, int width, int height) {
 	GL(glEnable(GL_BLEND));
 	GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
+    GL(glEnable(GL_DEPTH_TEST));
+    GL(glDepthFunc(GL_LESS));
+
 	// gfx vars init
 	fbo_bound = false;
 	gfx_on_resize(); // detects vars based on gfx size
@@ -108,7 +111,7 @@ void gfx_blit(texture_t *texture, float *in_pos, float *in_size) {
 
 void gfx_clear(float r, float g, float b, float a) {
 	GL(glClearColor(r, g, b, a));
-	GL(glClear(GL_COLOR_BUFFER_BIT));
+	GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
 void gfx_flip() {

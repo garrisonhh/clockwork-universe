@@ -10,8 +10,9 @@
     X(VBO_DRAWPOS, 3)\
     X(VBO_DRAWSIZE, 2)\
     X(VBO_DRAWOFFSET, 2)\
-    X(VBO_ATLASPOS, 2)\
-    X(VBO_ATLASSIZE, 2)\
+    X(VBO_TEXPOS, 2)\
+    X(VBO_DEPTHTEXPOS, 2)\
+    X(VBO_TEXSIZE, 2)
 
 enum BATCH3D_VBOS {
 #define X(a, b) a,
@@ -33,15 +34,16 @@ void batch3d_init(int batch_array_size) {
 	batcher_construct(&batcher3d, GL_TRIANGLE_STRIP, 4);
 
 	shader_attach(batcher3d.shader, "res/shaders/batch3d_vert.glsl", SHADER_VERTEX);
-	shader_attach(batcher3d.shader, "res/shaders/atlas_frag.glsl", SHADER_FRAGMENT);
-	shader_compile(batcher3d.shader);
+	shader_attach(batcher3d.shader, "res/shaders/batch3d_frag.glsl", SHADER_FRAGMENT);
+    shader_compile(batcher3d.shader);
 
 	for (size_t i = 0; i < NUM_BATCH3D_VBOS; ++i)
 		batcher_add_buffer(&batcher3d, VBO_ITEMS[i]);
 
 	// load
 	atlas_construct(&atlas3d);
-	atlas_add_texture(&atlas3d, "testblock", "res/blocks/TESTBLOCK.png");
+    atlas_add_texture(&atlas3d, "testblock", "res/blocks/TESTBLOCK.png");
+	atlas_add_texture(&atlas3d, "blockdepth", "res/blocks/BLOCKDEPTH.png");
 	atlas_generate(&atlas3d);
 }
 
@@ -50,17 +52,19 @@ void batch3d_quit() {
 	batcher_destruct(&batcher3d);
 }
 
-void batch3d_queue(int ref_idx, vec3 pos, vec2 offset) {
-	atlas_ref_t *ref = &atlas3d.refs[ref_idx];
+void batch3d_queue(int ref_idx, int depth_ref_idx, vec3 pos, vec2 offset) {
+    atlas_ref_t *ref = &atlas3d.refs[ref_idx];
+	atlas_ref_t *depth_ref = &atlas3d.refs[depth_ref_idx];
 
 	batcher_queue_attr(&batcher3d, VBO_DRAWPOS, pos);
     batcher_queue_attr(&batcher3d, VBO_DRAWSIZE, ref->pixel_size);
 	batcher_queue_attr(&batcher3d, VBO_DRAWOFFSET, offset);
-	batcher_queue_attr(&batcher3d, VBO_ATLASPOS, ref->pos);
-	batcher_queue_attr(&batcher3d, VBO_ATLASSIZE, ref->size);
+    batcher_queue_attr(&batcher3d, VBO_TEXPOS, ref->pos);
+	batcher_queue_attr(&batcher3d, VBO_DEPTHTEXPOS, depth_ref->pos);
+	batcher_queue_attr(&batcher3d, VBO_TEXSIZE, ref->size);
 }
 
-void batch3d_draw(int scale) {
+void batch3d_draw(int scale, float render_dist) {
 	vec2 disp_size, camera;
 
 	shader_bind(batcher3d.shader);
@@ -71,7 +75,8 @@ void batch3d_draw(int scale) {
 
 	GL(glUniform2fv(shader_uniform_location(batcher3d.shader, "camera"), 1, camera));
     GL(glUniform2fv(shader_uniform_location(batcher3d.shader, "screen_size"), 1, disp_size));
-	GL(glUniform1f(shader_uniform_location(batcher3d.shader, "scale"), (float)scale));
+    GL(glUniform1f(shader_uniform_location(batcher3d.shader, "scale"), (float)scale));
+	GL(glUniform1f(shader_uniform_location(batcher3d.shader, "render_dist"), render_dist));
 
 	texture_bind(atlas3d.texture, 0);
 	GL(glUniform1i(shader_uniform_location(batcher3d.shader, "atlas3d"), 0));

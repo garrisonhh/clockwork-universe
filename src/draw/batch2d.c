@@ -30,7 +30,7 @@ void batch2d_init(int batch_array_size) {
 
 	// load atlas2d
 	atlas_construct(&atlas2d);
-	// TODO
+	// TODO add 2d textures
 	atlas_generate(&atlas2d);
 }
 

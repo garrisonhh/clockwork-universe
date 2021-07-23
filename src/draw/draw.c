@@ -9,7 +9,7 @@
 
 #include <SDL2/SDL.h>
 
-int font_ref, block_ref;
+int font_ref, block_ref, block_depth_ref;
 gtimer_t *fps_timer, *draw_timer, *logic_timer;
 
 void draw_init() {
@@ -24,6 +24,7 @@ void draw_init() {
     // load
     font_ref = batch_font_get_ref("font");
     block_ref = batch3d_get_ref("testblock");
+    block_depth_ref = batch3d_get_ref("blockdepth");
 }
 
 void draw_quit() {
@@ -36,13 +37,12 @@ void draw_quit() {
 }
 
 void draw_frame() {
-    const int scale = 2;
     const float goal_fps = 120.0;
     const font_attrs_t font_attrs = {
-        .color = {1.0, 0.0, 1.0, 1.0},
-        .italicize = 0.25,
-        .scale = 2.0,
-        .waviness = 1.0
+        .color = {0.5, 1.0, 1.0, 1.0},
+        .italicize = 0.0,
+        .scale = 1.0,
+        .waviness = 0.0
     };
     char fps_text[100];
     vec3 pos;
@@ -73,16 +73,14 @@ void draw_frame() {
 
     gfx_clear(0.1, 0.1, 0.1, 1.0);
 
-    /*
     // we can get to 32,768 (2 ** 15) blocks before it's too much. I think it's a heap
     // memory thing, not an opengl thing. TODO memory optimization for batching, ig!
     FOR_CUBE(pos[0], pos[1], pos[2], 0, 4)
-        batch3d_queue(block_ref, pos, (vec2){-16.0, -18.0});
+        batch3d_queue(block_ref, block_depth_ref, pos, (vec2){-16.0, -18.0});
 
-    batch3d_draw(scale);
-    */
+    batch3d_draw(2, 100.0);
 
-    batch_font_queue(font_ref, (vec2){-200.0, -100.0}/*topleft*/, fps_text, &font_attrs);
+    batch_font_queue(font_ref, topleft, fps_text, &font_attrs);
     batch_font_draw();
 
     gtimer_tick(draw_timer);

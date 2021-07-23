@@ -21,15 +21,20 @@ const vec2 quad[] = vec2[](
 layout (location = 0) in vec3 draw_pos; // 3d position
 layout (location = 1) in vec2 draw_size; // pixels
 layout (location = 2) in vec2 draw_offset; // pixels
-layout (location = 3) in vec2 atlas_pos; // tex coords
-layout (location = 4) in vec2 atlas_size; // tex coords
 
-out vec2 v_atlas_pos;
+// tex coords
+layout (location = 3) in vec2 tex_pos;
+layout (location = 4) in vec2 depth_tex_pos;
+layout (location = 5) in vec2 tex_size;
+
+out vec2 v_tex_pos;
+out vec2 v_depth_tex_pos;
 
 uniform vec2 camera;
 // TODO uniform vec3 camera_dir ?
 uniform vec2 screen_size;
 uniform float scale;
+uniform float render_dist;
 
 vec2 project(vec3 pos) {
     return vec2(
@@ -47,8 +52,12 @@ void main() {
 	pos.y = -pos.y;
     pos *= scale;
 
-	gl_Position = vec4(pos, 0.0, 1.0);
+    // find depth
+    float depth = 1.0 - ((draw_pos.x + draw_pos.y + draw_pos.z) / render_dist);
+
+	gl_Position = vec4(pos, depth, 1.0);
 
 	// atlas quad position
-	v_atlas_pos = atlas_pos + (atlas_size * quad[gl_VertexID]);
+    v_tex_pos = tex_pos + (tex_size * quad[gl_VertexID]);
+	v_depth_tex_pos = depth_tex_pos + (tex_size * quad[gl_VertexID]);
 }

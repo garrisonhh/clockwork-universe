@@ -18,7 +18,7 @@
     X(VBO_COLOR, 4)\
     X(VBO_ITALICIZE, 1)\
     X(VBO_SCALE, 1)\
-    X(VBO_WAVINESS, 1)\
+    X(VBO_WAVINESS, 1)
 
 enum BATCH_FONT_VBOS {
 #define X(a, b) a,
