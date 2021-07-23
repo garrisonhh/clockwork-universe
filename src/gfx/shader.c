@@ -110,6 +110,7 @@ void check_shader(GLuint handle, GLuint flags, bool is_program, const char *msg)
 		else
 			GL(glGetShaderInfoLog(handle, sizeof(error), NULL, error));
 
-		ERROR("%s:\n%s\n", msg, error);
+		fprintf(stderr, "%s:\n%s\n", msg, error);
+		exit(-1);
 	}
 }

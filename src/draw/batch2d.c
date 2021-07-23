@@ -28,9 +28,9 @@ void batch2d_init(int batch_array_size) {
 	for (size_t i = 0; i < NUM_BATCH_VBOS; ++i)
 		batcher_add_buffer(&batcher2d, 2);
 
-	// loadatlas2d
+	// load atlas2d
 	atlas_construct(&atlas2d);
-	atlas_add_sheet(&atlas2d, "font", "res/fonts/CGA8x8thick.png", (vec2){8.0, 8.0});
+	// TODO
 	atlas_generate(&atlas2d);
 }
 
@@ -46,27 +46,6 @@ void batch2d_queue(int ref_idx, vec2 pos) {
 	batcher_queue_attr(&batcher2d, VBO_DRAWSIZE, ref->pixel_size);
 	batcher_queue_attr(&batcher2d, VBO_ATLASPOS, ref->pos);
 	batcher_queue_attr(&batcher2d, VBO_ATLASSIZE, ref->size);
-}
-
-void batch2d_queue_text(int font_idx, vec2 pos, const char *text) {
-	int ref_idx;
-	vec2 carriage = {0.0, 0.0}, text_pos;
-
-	while (*text) {
-        ref_idx = font_idx + *text;
-
-        if (*text == '\n') {
-            carriage[0] = 0.0;
-    		carriage[1] += atlas2d.refs[ref_idx].pixel_size[1] + 1;
-        } else {
-            glm_vec2_add(pos, carriage, text_pos);
-    		batch2d_queue(ref_idx, text_pos);
-
-    		carriage[0] += atlas2d.refs[ref_idx].pixel_size[0] + 1;
-        }
-
-        ++text;
-	}
 }
 
 void batch2d_draw() {

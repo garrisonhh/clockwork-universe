@@ -9,7 +9,8 @@
 void batch3d_init(int batch_array_size);
 void batch3d_quit(void);
 
-// pos is relative to range [-1.0, 1.0] screen x, y values
+// pos is 3d position, offset is pixel offset
+// TODO store pixel offsets with refs somehow instead of submitting them to queue every time
 void batch3d_queue(int ref_idx, vec3 pos, vec2 offset);
 void batch3d_draw(int scale);
 
