@@ -2,12 +2,12 @@
 
 // size of a voxel image
 #define VOXEL_IMG_WIDTH     32.0
-#define VOXEL_IMG_HEIGHT    34.0
+#define VOXEL_IMG_HEIGHT    36.0
 
 // pixel projection constants based on voxel image size
 const vec3 VOXEL_PIXELS = vec3(
-    VOXEL_IMG_WIDTH / 2.0,
-    VOXEL_IMG_WIDTH / 4.0,
+    (VOXEL_IMG_WIDTH / 2.0),
+    (VOXEL_IMG_WIDTH / 4.0),
     VOXEL_IMG_HEIGHT - (VOXEL_IMG_WIDTH / 2.0)
 );
 
