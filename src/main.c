@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <SDL2/SDL.h>
 #include <ghh/vector.h>
 #include <ghh/memcheck.h>
@@ -13,6 +14,9 @@
 #define MAIN main
 #endif
 
+vec3 pos = {20.0, 20.0, 20.0}, move = {0};
+const uint8_t *keyboard = NULL;
+
 void init(void);
 void cleanup(void);
 bool process_events(void);
@@ -20,9 +24,11 @@ bool process_events(void);
 int MAIN(int argc, char **argv) {
     init();
 
+    keyboard = SDL_GetKeyboardState(NULL);
+
     while (process_events()) {
         // apply game logic()
-        draw_frame();
+        draw_frame(pos);
     }
 
     cleanup();
@@ -33,6 +39,9 @@ int MAIN(int argc, char **argv) {
 bool process_events() {
     SDL_Event event;
 
+    glm_vec3_copy((vec3){0}, move);
+
+    // polled
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_QUIT:
@@ -49,6 +58,23 @@ bool process_events() {
             break;
         }
     }
+
+    // state
+    if (keyboard[SDL_SCANCODE_W])
+        glm_vec3_add(move, (vec3){-1.0, -1.0,  0.0}, move);
+    if (keyboard[SDL_SCANCODE_S])
+        glm_vec3_add(move, (vec3){ 1.0,  1.0,  0.0}, move);
+    if (keyboard[SDL_SCANCODE_A])
+        glm_vec3_add(move, (vec3){-1.0,  1.0,  0.0}, move);
+    if (keyboard[SDL_SCANCODE_D])
+        glm_vec3_add(move, (vec3){ 1.0, -1.0,  0.0}, move);
+    if (keyboard[SDL_SCANCODE_LSHIFT])
+        glm_vec3_add(move, (vec3){ 0.0,  0.0, -1.0}, move);
+    if (keyboard[SDL_SCANCODE_SPACE])
+        glm_vec3_add(move, (vec3){ 0.0,  0.0,  1.0}, move);
+
+    glm_vec3_scale(move, 0.05, move);
+    glm_vec3_add(pos, move, pos);
 
     return true;
 }

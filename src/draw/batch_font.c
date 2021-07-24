@@ -65,21 +65,36 @@ void batch_font_quit() {
 }
 
 // internal only
-void batch_font_queue_lower(int ref_idx, vec2 pos, const font_attrs_t *attrs) {
+void batch_font_queue_lower(int ref_idx, vec2 pos, font_attrs_t *attrs) {
 	atlas_ref_t *ref = &font_atlas.refs[ref_idx];
 
+    /*
 	batcher_queue_attr(&font_batcher, VBO_DRAWPOS, pos);
 	batcher_queue_attr(&font_batcher, VBO_DRAWSIZE, ref->pixel_size);
 	batcher_queue_attr(&font_batcher, VBO_ATLASPOS, ref->pos);
 	batcher_queue_attr(&font_batcher, VBO_ATLASSIZE, ref->size);
 
     batcher_queue_attr(&font_batcher, VBO_COLOR, (float *)attrs->color);
-    batcher_queue_attr(&font_batcher, VBO_ITALICIZE, (float *)&attrs->italicize);
+    batcher_queue_attr(&font_batcher, VBO_ITALICIZE, (float *)attrs->color);
     batcher_queue_attr(&font_batcher, VBO_SCALE, (float *)&attrs->scale);
     batcher_queue_attr(&font_batcher, VBO_WAVINESS, (float *)&attrs->waviness);
+    */
+
+    float *data[NUM_BATCH_FONT_VBOS] = {
+        pos,
+        ref->pixel_size,
+        ref->pos,
+        ref->size,
+        attrs->color,
+        &attrs->italicize,
+        &attrs->scale,
+        &attrs->waviness
+    };
+
+    batcher_queue(&font_batcher, data);
 }
 
-void batch_font_queue(int font_idx, vec2 pos, const char *text, const font_attrs_t *attrs) {
+void batch_font_queue(int font_idx, vec2 pos, const char *text, font_attrs_t *attrs) {
     vec2 carriage = {0.0, 0.0}, text_pos;
 	int ref_idx;
 

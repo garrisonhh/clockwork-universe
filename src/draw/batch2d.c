@@ -12,7 +12,7 @@ enum BATCH2D_VBOS {
 	VBO_ATLASPOS,
 	VBO_ATLASSIZE,
 
-	NUM_BATCH_VBOS
+	NUM_BATCH2D_VBOS
 };
 
 atlas_t atlas2d;
@@ -25,7 +25,7 @@ void batch2d_init(int batch_array_size) {
 	shader_attach(batcher2d.shader, "res/shaders/atlas_frag.glsl", SHADER_FRAGMENT);
 	shader_compile(batcher2d.shader);
 
-	for (size_t i = 0; i < NUM_BATCH_VBOS; ++i)
+	for (size_t i = 0; i < NUM_BATCH2D_VBOS; ++i)
 		batcher_add_buffer(&batcher2d, 2);
 
 	// load atlas2d
@@ -42,10 +42,14 @@ void batch2d_quit() {
 void batch2d_queue(int ref_idx, vec2 pos) {
 	atlas_ref_t *ref = &atlas2d.refs[ref_idx];
 
-	batcher_queue_attr(&batcher2d, VBO_DRAWPOS, pos);
-	batcher_queue_attr(&batcher2d, VBO_DRAWSIZE, ref->pixel_size);
-	batcher_queue_attr(&batcher2d, VBO_ATLASPOS, ref->pos);
-	batcher_queue_attr(&batcher2d, VBO_ATLASSIZE, ref->size);
+	float *data[NUM_BATCH2D_VBOS] = {
+		pos,
+		ref->pixel_size,
+		ref->pos,
+		ref->size
+	};
+
+	batcher_queue(&batcher2d, data);
 }
 
 void batch2d_draw() {

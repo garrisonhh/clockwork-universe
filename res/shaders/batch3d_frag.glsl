@@ -10,10 +10,10 @@ uniform float render_dist;
 
 void main() {
     // sample depth values from texture, flip, and scale
-    // depth texture represents near as 1.0 (white) and far as 0.0 (black),
-    // while opengl is the opposite
     float depth_tex = texture(atlas, v_depth_tex_pos).r;
 
+    // depth texture represents near as 1.0 (white) and far as 0.0 (black),
+    // while opengl is the opposite
     depth_tex = (1.0 - depth_tex) / render_dist;
 
     // pass frag color
@@ -26,8 +26,8 @@ void main() {
     // display depth for testing
     float depth = gl_FragDepth;
 
-    depth = clamp((1.0 - depth) * 10.0, 0.0, 1.0);
+    depth = clamp(depth, 0.0, 1.0);
 
-    frag_color = vec4(vec3(depth), 1.0);
+    frag_color = mix(vec4(vec3(0.1), 1.0), frag_color, 1.0 - depth);
 #endif
 }

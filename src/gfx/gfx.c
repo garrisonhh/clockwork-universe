@@ -50,6 +50,7 @@ void gfx_init(const char *name, int width, int height) {
 
     GL(glEnable(GL_DEPTH_TEST));
     GL(glDepthFunc(GL_LESS));
+	GL(glDepthRange(0.0, 1.0));
 
 	// gfx vars init
 	fbo_bound = false;

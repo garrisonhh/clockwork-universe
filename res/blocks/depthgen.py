@@ -15,7 +15,7 @@ def main():
     for y in range(16):
         for x in range(16):
             if 8 - int(x / 2) <= y + 1:
-                image.set_at((x, y), [int((float(y) / 15) * 255.0)] * 3)
+                image.set_at((x, y), [int((float(y + 1) / 16) * 255.0)] * 3)
 
     # generate left side
     for i in range(8):
@@ -25,7 +25,7 @@ def main():
             for x in range(2):
                 image.set_at(
                     (i * 2 + x, y + 8 + i),
-                    [c[0] - int((float(y) / 20) * (255.0 * 0.5))] * 3
+                    [c[0] - int((float(y) / 21) * (255.0 * 0.5))] * 3
                 )
 
     # flip left side to right

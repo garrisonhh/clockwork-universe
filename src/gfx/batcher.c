@@ -1,72 +1,84 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <ghh/vector.h>
 #include <ghh/memcheck.h>
 
 #include "batcher.h"
 #include "gfx.h"
 
-typedef struct batch_buffer {
+// linear growth block size for batch buffer
+#define BATCH_BUFFER_GROWTH 256
+
+struct batch_buffer {
+    // manually memory management here instead of array_t or vector; in this
+    // case a linear growth model makes more sense
+    // TODO a block-based approach to prevent tons of realloc calls?
+    float *data;
+    size_t size, alloc_size; // occupied size of array, allocated size of array
+    size_t size_data; // size of one buffered attribute (vec3 = 3, float * = 1)
     GLuint vbo;
-    size_t item_size;
-    float *items; // ghh vector
-} batch_buffer_t;
+};
 
 void batcher_construct(batcher_t *batcher, GLenum instance_mode, size_t instance_count) {
-    GLint max_attrs;
-
-    GL(glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &max_attrs));
-
     batcher->shader = shader_create();
-    batcher->buffers = array_create(0);
     batcher->instance_mode = instance_mode;
     batcher->instance_count = instance_count;
+    batcher->buffers = NULL;
+    batcher->num_buffers = 0;
 
     GL(glGenVertexArrays(1, &batcher->vao));
 }
 
 void batcher_destruct(batcher_t *batcher) {
-    // clean up buffers
-    batch_buffer_t *buffer;
+    for (size_t i = 0; i < batcher->num_buffers; ++i) {
+        if (batcher->buffers[i].data != NULL)
+            free(batcher->buffers[i].data);
 
-    for (size_t i = 0; i < array_size(batcher->buffers); ++i) {
-        buffer = array_get(batcher->buffers, i);
-
-    	GL(glDeleteBuffers(1, &buffer->vbo));
-        VECTOR_FREE(buffer->items);
-
-        free(buffer);
+        GL(glGenBuffers(1, &batcher->buffers[i].vbo));
     }
 
-    // clean up batcher
     shader_destroy(batcher->shader);
-    array_destroy(batcher->buffers, false);
+    free(batcher->buffers);
 
 	GL(glDeleteVertexArrays(1, &batcher->vao));
 }
 
-void batcher_add_buffer(batcher_t *batcher, size_t item_size) {
-    batch_buffer_t *buffer = malloc(sizeof(*buffer));
+void batcher_add_buffer(batcher_t *batcher, size_t vector_size) {
+    size_t index = batcher->num_buffers;
 
-    GL(glGenBuffers(1, &buffer->vbo));
+    batcher->buffers = realloc(
+        batcher->buffers,
+        (++batcher->num_buffers) * sizeof(*batcher->buffers)
+    );
 
-    VECTOR_ALLOC(buffer->items, 0);
-    buffer->item_size = item_size;
+    batcher->buffers[index] = (batch_buffer_t){0};
+    batcher->buffers[index].data = NULL;
+    batcher->buffers[index].size_data = vector_size;
 
-    array_push(batcher->buffers, buffer);
+    GL(glGenBuffers(1, &batcher->buffers[index].vbo));
 }
 
-void batcher_queue_attr(batcher_t *batcher, size_t buffer_idx, float *item) {
-    batch_buffer_t *buffer = array_get(batcher->buffers, buffer_idx);
+void batcher_queue(batcher_t *batcher, float **data) {
+    size_t index;
+    batch_buffer_t *buffer;
 
-    for (size_t i = 0; i < buffer->item_size; ++i)
-        VECTOR_PUSH(buffer->items, item[i]);
-}
+    for (size_t i = 0; i < batcher->num_buffers; ++i) {
+        buffer = &batcher->buffers[i];
+        index = buffer->size;
 
-static inline size_t buffer_size(batcher_t *batcher, size_t buffer_idx) {
-    batch_buffer_t *buffer = array_get(batcher->buffers, buffer_idx);
+        // resize buffer if needed
+        buffer->size += buffer->size_data;
 
-    return VECTOR_SIZE(buffer->items) / buffer->item_size;
+        if (buffer->size > buffer->alloc_size) {
+            buffer->alloc_size += BATCH_BUFFER_GROWTH;
+
+            buffer->data = realloc(buffer->data, buffer->alloc_size * sizeof(*buffer->data));
+        }
+
+        // copy vector to buffer
+        memcpy(&buffer->data[index], data[i], buffer->size_data * sizeof(*buffer->data));
+    }
 }
 
 void batcher_draw(batcher_t *batcher) {
@@ -74,37 +86,32 @@ void batcher_draw(batcher_t *batcher) {
     size_t i, num_items;
 
     // get num items
-    if (array_size(batcher->buffers))
-        num_items = buffer_size(batcher, 0);
-    else
+    if (!(num_items = batcher->buffers[0].size))
         return; // zero items queued, nothing to draw
-
-#ifdef DEBUG
-    // verify buffers
-    for (i = 1; i < array_size(batcher->buffers); ++i) {
-        if (buffer_size(batcher, i) != num_items)
-             ERROR("batcher buffers are not equal in size on draw.");
-    }
-#endif
 
     // buffer batch data
 	GL(glBindVertexArray(batcher->vao));
 
-    for (i = 0; i < array_size(batcher->buffers); ++i) {
-        buffer = array_get(batcher->buffers, i);
+    for (i = 0; i < batcher->num_buffers; ++i) {
+        buffer = &batcher->buffers[i];
 
+        // pass in data
         GL(glBindBuffer(GL_ARRAY_BUFFER, buffer->vbo));
         GL(glBufferData(
             GL_ARRAY_BUFFER,
-            num_items * buffer->item_size * sizeof(*buffer->items),
-            buffer->items,
+            buffer->size * sizeof(*buffer->data),
+            buffer->data,
             GL_STREAM_DRAW
         ));
 
-        VECTOR_CLEAR(buffer->items);
+        // clear buffer
+        free(buffer->data);
+        buffer->data = NULL;
+        buffer->size = buffer->alloc_size = 0;
 
+        // enable vertex
 		GL(glEnableVertexAttribArray(i));
-		GL(glVertexAttribPointer(i, buffer->item_size, GL_FLOAT, GL_FALSE, 0, NULL));
+		GL(glVertexAttribPointer(i, buffer->size_data, GL_FLOAT, GL_FALSE, 0, NULL));
 		GL(glVertexAttribDivisor(i, 1));
     }
 
@@ -117,7 +124,7 @@ void batcher_draw(batcher_t *batcher) {
     ));
 
 	// clean up
-	for (i = 0; i < array_size(batcher->buffers); ++i)
+	for (i = 0; i < batcher->num_buffers; ++i)
 		GL(glDisableVertexAttribArray(i));
 
 	GL(glBindVertexArray(0));

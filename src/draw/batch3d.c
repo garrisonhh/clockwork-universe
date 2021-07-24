@@ -56,12 +56,16 @@ void batch3d_queue(int ref_idx, int depth_ref_idx, vec3 pos, vec2 offset) {
     atlas_ref_t *ref = &atlas3d.refs[ref_idx];
 	atlas_ref_t *depth_ref = &atlas3d.refs[depth_ref_idx];
 
-	batcher_queue_attr(&batcher3d, VBO_DRAWPOS, pos);
-    batcher_queue_attr(&batcher3d, VBO_DRAWSIZE, ref->pixel_size);
-	batcher_queue_attr(&batcher3d, VBO_DRAWOFFSET, offset);
-    batcher_queue_attr(&batcher3d, VBO_TEXPOS, ref->pos);
-	batcher_queue_attr(&batcher3d, VBO_DEPTHTEXPOS, depth_ref->pos);
-	batcher_queue_attr(&batcher3d, VBO_TEXSIZE, ref->size);
+    float *data[NUM_BATCH3D_VBOS] = {
+        pos,
+        ref->pixel_size,
+        offset,
+        ref->pos,
+        depth_ref->pos,
+        ref->size
+    };
+
+    batcher_queue(&batcher3d, data);
 }
 
 void batch3d_draw(int scale, float render_dist) {

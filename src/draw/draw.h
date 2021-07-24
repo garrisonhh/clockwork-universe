@@ -4,6 +4,6 @@
 void draw_init(void);
 void draw_quit(void);
 
-void draw_frame(void);
+void draw_frame(vec3);
 
 #endif
