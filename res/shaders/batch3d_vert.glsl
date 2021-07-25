@@ -38,11 +38,6 @@ uniform vec2 screen_size;
 uniform float scale;
 uniform float render_dist;
 
-/*
-align bool 
-*/
-uniform bool align;
-
 vec2 project(vec3 pos) {
     return vec2(
         (pos.x - pos.y) * PROJECT_PIXELS.x,

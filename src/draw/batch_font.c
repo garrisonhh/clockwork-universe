@@ -10,29 +10,6 @@
 #include "../gfx/shader.h"
 #include "../gfx/atlas.h"
 
-#define VBO_DEFS() \
-    X(VBO_DRAWPOS, 3)\
-    X(VBO_DRAWSIZE, 2)\
-    X(VBO_ATLASPOS, 2)\
-    X(VBO_ATLASSIZE, 2)\
-    X(VBO_COLOR, 4)\
-    X(VBO_ITALICIZE, 1)\
-    X(VBO_SCALE, 1)\
-    X(VBO_WAVINESS, 1)
-
-enum BATCH_FONT_VBOS {
-#define X(a, b) a,
-    VBO_DEFS()
-#undef X
-    NUM_BATCH_FONT_VBOS
-};
-
-const int BATCH_FONT_ITEMS[NUM_BATCH_FONT_VBOS] = {
-#define X(a, b) b,
-    VBO_DEFS()
-#undef X
-};
-
 font_attrs_t default_attrs = {
     .color = {1.0, 1.0, 1.0, 1.0},
     .italicize = 0.0,
@@ -41,19 +18,20 @@ font_attrs_t default_attrs = {
 };
 
 atlas_t font_atlas;
-batcher_t font_batcher;
+shader_t *font_shader;
+batcher_t *font_batcher;
 
 void batch_font_init(int batch_array_size) {
-	batcher_construct(&font_batcher, GL_TRIANGLE_STRIP, 4);
+    const size_t buffers[] = {3, 2, 2, 2, 4, 1, 1, 1};
+    const size_t num_buffers = ARRAY_LEN(buffers);
 
-	shader_attach(font_batcher.shader, "res/shaders/batch_font_vert.glsl", SHADER_VERTEX);
-	shader_attach(font_batcher.shader, "res/shaders/batch_font_frag.glsl", SHADER_FRAGMENT);
-	shader_compile(font_batcher.shader);
+    font_batcher = batcher_create(buffers, num_buffers);
 
-	for (size_t i = 0; i < NUM_BATCH_FONT_VBOS; ++i)
-		batcher_add_buffer(&font_batcher, BATCH_FONT_ITEMS[i]);
+    font_shader = shader_create();
+	shader_attach(font_shader, "res/shaders/batch_font_vert.glsl", SHADER_VERTEX);
+	shader_attach(font_shader, "res/shaders/batch_font_frag.glsl", SHADER_FRAGMENT);
+	shader_compile(font_shader);
 
-	// load font_atlas
 	atlas_construct(&font_atlas);
 	atlas_add_sheet(&font_atlas, "font", "res/fonts/CGA8x8thick.png", (vec2){8.0, 8.0});
 	atlas_generate(&font_atlas);
@@ -61,26 +39,15 @@ void batch_font_init(int batch_array_size) {
 
 void batch_font_quit() {
 	atlas_destruct(&font_atlas);
-	batcher_destruct(&font_batcher);
+	batcher_destroy(font_batcher);
+    shader_destroy(font_shader);
 }
 
 // internal only
 void batch_font_queue_lower(int ref_idx, vec2 pos, font_attrs_t *attrs) {
 	atlas_ref_t *ref = &font_atlas.refs[ref_idx];
 
-    /*
-	batcher_queue_attr(&font_batcher, VBO_DRAWPOS, pos);
-	batcher_queue_attr(&font_batcher, VBO_DRAWSIZE, ref->pixel_size);
-	batcher_queue_attr(&font_batcher, VBO_ATLASPOS, ref->pos);
-	batcher_queue_attr(&font_batcher, VBO_ATLASSIZE, ref->size);
-
-    batcher_queue_attr(&font_batcher, VBO_COLOR, (float *)attrs->color);
-    batcher_queue_attr(&font_batcher, VBO_ITALICIZE, (float *)attrs->color);
-    batcher_queue_attr(&font_batcher, VBO_SCALE, (float *)&attrs->scale);
-    batcher_queue_attr(&font_batcher, VBO_WAVINESS, (float *)&attrs->waviness);
-    */
-
-    float *data[NUM_BATCH_FONT_VBOS] = {
+    float *data[] = {
         pos,
         ref->pixel_size,
         ref->pos,
@@ -91,7 +58,7 @@ void batch_font_queue_lower(int ref_idx, vec2 pos, font_attrs_t *attrs) {
         &attrs->waviness
     };
 
-    batcher_queue(&font_batcher, data);
+    batcher_queue(font_batcher, data);
 }
 
 void batch_font_queue(int font_idx, vec2 pos, const char *text, font_attrs_t *attrs) {
@@ -122,26 +89,26 @@ void batch_font_draw() {
 	vec2 disp_size, camera;
     float time;
 
-    shader_bind(font_batcher.shader);
+    shader_bind(font_shader);
 
 	// pass in uniforms
 	gfx_get_camera(camera);
 	gfx_get_size(disp_size);
     time = fmod(timeit_get_time(), 1000000.0);
 
-	GL(glUniform2fv(shader_uniform_location(font_batcher.shader, "camera"), 1, camera));
+	GL(glUniform2fv(shader_uniform_location(font_shader, "camera"), 1, camera));
 	GL(glUniform2fv(
-        shader_uniform_location(font_batcher.shader, "screen_size"),
+        shader_uniform_location(font_shader, "screen_size"),
         1, disp_size
     ));
 
-	GL(glUniform1f(shader_uniform_location(font_batcher.shader, "t"), time));
+	GL(glUniform1f(shader_uniform_location(font_shader, "t"), time));
 
 	texture_bind(font_atlas.texture, 0);
-	GL(glUniform1i(shader_uniform_location(font_batcher.shader, "font_atlas"), 0));
+	GL(glUniform1i(shader_uniform_location(font_shader, "font_atlas"), 0));
 
 	// draw
-	batcher_draw(&font_batcher);
+	batcher_draw(font_batcher, GL_TRIANGLE_STRIP, 4);
 }
 
 int batch_font_get_ref(const char *name) {

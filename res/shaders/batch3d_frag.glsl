@@ -1,5 +1,7 @@
 #version 330 core
 
+#define M_PI 3.1415
+
 in vec2 v_tex_pos;
 in vec2 v_depth_tex_pos;
 
@@ -24,10 +26,16 @@ void main() {
 
 #if 0
     // display depth for testing
-    float depth = gl_FragDepth;
+    // TODO this stuff has shown that the VOXEL_PIXEL z value is off, plz fix!!!
+    int idepth = int(gl_FragDepth * float(1 << 24));
+    vec3 dcolor = vec3(
+        (idepth & 0xFF0000) >> 0x10,
+        (idepth & 0x00FF00) >> 0x08,
+        (idepth & 0x0000FF) >> 0x00
+    ) / 255.0;
 
-    depth = clamp(depth, 0.0, 1.0);
+    dcolor = cos(dcolor * M_PI); // make it wavy
 
-    frag_color = mix(vec4(vec3(0.1), 1.0), frag_color, 1.0 - depth);
+    frag_color = mix(vec4(dcolor, 1.0), frag_color, 0.0);
 #endif
 }
