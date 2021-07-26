@@ -27,10 +27,12 @@ layout (location = 2) in vec2 draw_offset; // pixels
 // tex coords
 layout (location = 3) in vec2 tex_pos;
 layout (location = 4) in vec2 depth_tex_pos;
-layout (location = 5) in vec2 tex_size;
+layout (location = 5) in vec2 normal_tex_pos;
+layout (location = 6) in vec2 tex_size;
 
 out vec2 v_tex_pos;
 out vec2 v_depth_tex_pos;
+out vec2 v_normal_tex_pos;
 
 uniform vec2 camera;
 // TODO uniform vec3 camera_dir ?
@@ -59,7 +61,10 @@ void main() {
 
 	gl_Position = vec4(pos, depth, 1.0);
 
-	// atlas quad position
-    v_tex_pos = tex_pos + (tex_size * quad[gl_VertexID]);
-	v_depth_tex_pos = depth_tex_pos + (tex_size * quad[gl_VertexID]);
+	// atlas quad positions
+    vec2 quad_pos = tex_size * quad[gl_VertexID];
+
+    v_tex_pos = tex_pos + quad_pos;
+	v_depth_tex_pos = depth_tex_pos + quad_pos;
+    v_normal_tex_pos = normal_tex_pos + quad_pos;
 }

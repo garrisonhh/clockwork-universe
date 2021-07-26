@@ -7,7 +7,6 @@
 #include <ghh/memcheck.h>
 
 #include "gfx.h"
-#include "shader.h"
 
 SDL_Window *window;
 SDL_GLContext *gl_ctx;

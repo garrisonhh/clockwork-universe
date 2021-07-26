@@ -49,6 +49,9 @@ void batcher_destroy(batcher_t *batcher) {
     for (size_t i = 0; i < batcher->num_buffers; ++i)
         free(batcher->buffers[i].data);
 
+    GL(glDeleteBuffers(batcher->num_buffers, batcher->vbos));
+
+    free(batcher->vbos);
     free(batcher->buffers);
     free(batcher);
 }

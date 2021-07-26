@@ -11,11 +11,22 @@
 #include "gfx.h"
 #include "shader.h"
 
-// this just maps shader_types_e values to GLenum values
-GLenum GL_SHADER_TYPES[NUM_SHADER_TYPES] = {
-	GL_VERTEX_SHADER,
-	GL_GEOMETRY_SHADER,
-	GL_FRAGMENT_SHADER
+#define SHADER_TYPES() \
+	X(SHADER_VERTEX, GL_VERTEX_SHADER)\
+	X(SHADER_GEOMETRY, GL_GEOMETRY_SHADER)\
+	X(SHADER_FRAGMENT, GL_FRAGMENT_SHADER)
+
+typedef enum shader_types {
+#define X(a, b) a,
+	SHADER_TYPES()
+#undef X
+	NUM_SHADER_TYPES
+} shader_types_e;
+
+GLenum GL_SHADER_TYPES[] = {
+#define X(a, b) b,
+	SHADER_TYPES()
+#undef X
 };
 
 struct shader {
@@ -23,14 +34,24 @@ struct shader {
 	GLuint program;
 	unsigned attached: NUM_SHADER_TYPES;
 };
-void check_shader(GLuint shader, GLuint flags, bool is_program, const char *msg);
-GLuint load_shader(const char *filename, GLenum shader_type);
 
-shader_t *shader_create() {
+GLuint load_shader(const char *filename, GLenum shader_type);
+void check_shader(GLuint handle, GLuint flags, bool is_program, const char *msg);
+void attach_source(shader_t *shader, const char *filename, shader_types_e type);
+void compile_program(shader_t *shader);
+
+shader_t *shader_create_lower(shader_params_t params) {
 	shader_t *shader = malloc(sizeof(*shader));
+	const char **sources = (const char **)&params;
 
 	GL(shader->program = glCreateProgram());
 	shader->attached = 0;
+
+	for (size_t i = 0; i < NUM_SHADER_TYPES; ++i)
+		if (sources[i] != NULL)
+			attach_source(shader, sources[i], i);
+
+	compile_program(shader);
 
 	return shader;
 }
@@ -47,12 +68,12 @@ void shader_destroy(shader_t *shader) {
 	free(shader);
 }
 
-void shader_attach(shader_t *shader, const char *filename, shader_types_e type) {
+void attach_source(shader_t *shader, const char *filename, shader_types_e type) {
 	shader->shaders[type] = load_shader(filename, GL_SHADER_TYPES[type]);
 	BIT_SET_TRUE(shader->attached, type);
 }
 
-void shader_compile(shader_t *shader) {
+void compile_program(shader_t *shader) {
 	for (int i = 0; i < NUM_SHADER_TYPES; ++i)
 		if (BIT_GET(shader->attached, i))
 			GL(glAttachShader(shader->program, shader->shaders[i]));
@@ -64,33 +85,19 @@ void shader_compile(shader_t *shader) {
 	check_shader(shader->program, GL_VALIDATE_STATUS, true, "program validation failed");
 }
 
-int shader_uniform_location(shader_t *shader, const char *var) {
-	return glGetUniformLocation(shader->program, var);
-}
-
-void shader_bind(shader_t *shader) {
-	GL(glUseProgram(shader->program));
-}
-
 GLuint load_shader(const char *filename, GLenum shader_type) {
 	GLuint shader;
-	char *text = load_text_file(filename);
-
-	const int num_sources = 1;
-	const GLchar *shader_src[num_sources];
-	GLint shader_src_lengths[num_sources];
+	const char * const text = load_text_file(filename);
+	GLint source_length = strlen(text);
 
 	GL(shader = glCreateShader(shader_type));
 
-	shader_src[0] = text;
-	shader_src_lengths[0] = strlen(text);
-
-	GL(glShaderSource(shader, num_sources, shader_src, shader_src_lengths));
+	GL(glShaderSource(shader, 1, &text, &source_length));
 
 	glCompileShader(shader);
 	check_shader(shader, GL_COMPILE_STATUS, false, "shader compilation failed");
 
-	free(text);
+	free((char *)text);
 
 	return shader;
 }
@@ -113,4 +120,12 @@ void check_shader(GLuint handle, GLuint flags, bool is_program, const char *msg)
 		fprintf(stderr, "%s:\n%s\n", msg, error);
 		exit(-1);
 	}
+}
+
+void shader_bind(shader_t *shader) {
+	GL(glUseProgram(shader->program));
+}
+
+int shader_uniform_location(shader_t *shader, const char *name) {
+	return glGetUniformLocation(shader->program, name);
 }

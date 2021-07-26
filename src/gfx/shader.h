@@ -3,31 +3,27 @@
 
 #include <stddef.h>
 
-typedef enum shader_types {
-	SHADER_VERTEX,
-	SHADER_GEOMETRY,
-	SHADER_FRAGMENT,
-
-	NUM_SHADER_TYPES
-} shader_types_e;
-
 typedef struct shader shader_t;
 
-// to use:
-// 1. create shader
-// 2. attach shader source files
-// 3. compile shader
+typedef struct shader_params {
+	// order here has to match shader_types_e in shader.c
+	const char *vert;
+	const char *geom;
+	const char *frag;
+} shader_params_t;
 
-shader_t *shader_create(void);
+// this macro mess just allows for default arguments
+shader_t *shader_create_lower(shader_params_t);
+#define shader_create(...) shader_create_lower((shader_params_t){\
+	.vert = NULL,\
+	.geom = NULL,\
+	.frag = NULL,\
+	__VA_ARGS__\
+});
 void shader_destroy(shader_t *);
-
-void shader_attach(shader_t *shader, const char *filename, shader_types_e type);
-void shader_compile(shader_t *);
 
 void shader_bind(shader_t *);
 
-// returns -1 on failure
-// TODO use a better form of uniform updating, probably a uniform buffer object abstraction
 int shader_uniform_location(shader_t *, const char *name);
 
 #endif

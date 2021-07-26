@@ -1,14 +1,18 @@
 #version 330 core
 
+//#define DEBUG_DEPTH
+
 #define M_PI 3.1415
 
 in vec2 v_tex_pos;
 in vec2 v_depth_tex_pos;
+in vec2 v_normal_tex_pos;
 
 layout (location = 0) out vec4 frag_color;
 
 uniform sampler2D atlas;
 uniform float render_dist;
+uniform vec3 light_pos;
 
 void main() {
     // sample depth values from texture, flip, and scale
@@ -21,21 +25,16 @@ void main() {
     // pass frag color
     frag_color = texture(atlas, v_tex_pos);
 
+    // find lighting value from normal and light_pos
+    vec3 normal = normalize(texture(atlas, v_normal_tex_pos).rgb * 2.0 - 1.0);
+    vec3 light = vec3(dot(normal, normalize(light_pos)));
+
+    frag_color.rgb *= light;
+
     // pass depth values where texture alpha is not zero
     gl_FragDepth = mix(1.0, gl_FragCoord.z + depth_tex, frag_color.a);
 
-#if 0
-    // display depth for testing
-    // TODO this stuff has shown that the VOXEL_PIXEL z value is off, plz fix!!!
-    int idepth = int(gl_FragDepth * float(1 << 24));
-    vec3 dcolor = vec3(
-        (idepth & 0xFF0000) >> 0x10,
-        (idepth & 0x00FF00) >> 0x08,
-        (idepth & 0x0000FF) >> 0x00
-    ) / 255.0;
-
-    dcolor = cos(dcolor * M_PI); // make it wavy
-
-    frag_color = mix(vec4(dcolor, 1.0), frag_color, 0.0);
+#ifdef DEBUG_DEPTH
+    frag_color = mix(vec4(vec3(gl_FragDepth), 1.0), frag_color, 0.0);
 #endif
 }

@@ -6,7 +6,7 @@
 #include "batch3d.h"
 #include "../gfx/gfx.h"
 
-int font_ref, block_ref, block_depth_ref;
+int font_ref, block_ref, bdepth_ref, bnorm_ref;
 gtimer_t *fps_timer, *draw_timer, *logic_timer;
 
 void draw_init() {
@@ -20,8 +20,9 @@ void draw_init() {
 
     // load
     font_ref = batch_font_get_ref("font");
-    block_ref = batch3d_get_ref("testblock");
-    block_depth_ref = batch3d_get_ref("blockdepth");
+    block_ref = batch3d_get_ref("blocktest");
+    bdepth_ref = batch3d_get_ref("blockdepth");
+    bnorm_ref = batch3d_get_ref("blocknormal");
 }
 
 void draw_quit() {
@@ -36,11 +37,13 @@ void draw_quit() {
 void draw_frame(vec3 test) {
     float fps;
     char fps_text[100];
-    vec3 pos, temp;
+    vec3 pos, temp, light_pos;
     vec2 topleft;
 
     gfx_get_size(topleft);
     glm_vec2_scale(topleft, -0.5, topleft);
+
+    glm_vec3_sub(test, (vec3){10.0, 10.0, 10.0}, light_pos);
 
     // fps + text
     gtimer_tick(fps_timer);
@@ -67,15 +70,15 @@ void draw_frame(vec3 test) {
     srand(0);
     FOR_CUBE(pos[0], pos[1], pos[2], 0, 20) {
         if (rand() % 2 < 1)
-            batch3d_queue(block_ref, block_depth_ref, pos, (vec2){-16.0, -20.0});
+            batch3d_queue(block_ref, bdepth_ref, bnorm_ref, pos, (vec2){-16.0, -20.0});
     }
 
     FOR_CUBE(pos[0], pos[1], pos[2], 0, 3) {
         glm_vec3_add(pos, test, temp);
-        batch3d_queue(block_ref, block_depth_ref, temp, (vec2){-16.0, -20.0});
+        batch3d_queue(block_ref, bdepth_ref, bnorm_ref, temp, (vec2){-16.0, -20.0});
     }
 
-    batch3d_draw(1, 50.0);
+    batch3d_draw(1, 50.0, light_pos);
 
     batch_font_queue(font_ref, topleft, fps_text, NULL);
     batch_font_draw();

@@ -6,6 +6,7 @@
 #include <ghh/utils.h>
 
 #include "texture.h"
+
 /*
 yes, the java-style getters and setters are annoying, but this interface has a LOT of gotchas
 under the hood, so it makes sense

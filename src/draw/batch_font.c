@@ -27,10 +27,10 @@ void batch_font_init(int batch_array_size) {
 
     font_batcher = batcher_create(buffers, num_buffers);
 
-    font_shader = shader_create();
-	shader_attach(font_shader, "res/shaders/batch_font_vert.glsl", SHADER_VERTEX);
-	shader_attach(font_shader, "res/shaders/batch_font_frag.glsl", SHADER_FRAGMENT);
-	shader_compile(font_shader);
+    font_shader = shader_create(
+        .vert = "res/shaders/batch_font_vert.glsl",
+        .frag = "res/shaders/batch_font_frag.glsl"
+    );
 
 	atlas_construct(&font_atlas);
 	atlas_add_sheet(&font_atlas, "font", "res/fonts/CGA8x8thick.png", (vec2){8.0, 8.0});
