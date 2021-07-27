@@ -8,13 +8,13 @@
 
 #include "gfx.h"
 
-SDL_Window *window;
-SDL_GLContext *gl_ctx;
+static SDL_Window *window;
+static SDL_GLContext *gl_ctx;
 
-int width, height;
-float aspect;
-vec2 camera;
-bool fbo_bound;
+static int width, height;
+static float aspect;
+static vec2 camera;
+static bool fbo_bound;
 
 void gfx_init(const char *name, int width, int height) {
 	// SDL and OpenGL init

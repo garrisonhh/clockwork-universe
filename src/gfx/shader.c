@@ -23,7 +23,7 @@ typedef enum shader_types {
 	NUM_SHADER_TYPES
 } shader_types_e;
 
-GLenum GL_SHADER_TYPES[] = {
+static GLenum GL_SHADER_TYPES[] = {
 #define X(a, b) b,
 	SHADER_TYPES()
 #undef X
@@ -35,10 +35,10 @@ struct shader {
 	unsigned attached: NUM_SHADER_TYPES;
 };
 
-GLuint load_shader(const char *filename, GLenum shader_type);
-void check_shader(GLuint handle, GLuint flags, bool is_program, const char *msg);
-void attach_source(shader_t *shader, const char *filename, shader_types_e type);
-void compile_program(shader_t *shader);
+static GLuint load_shader(const char *filename, GLenum shader_type);
+static void check_shader(GLuint handle, GLuint flags, bool is_program, const char *msg);
+static void attach_source(shader_t *shader, const char *filename, shader_types_e type);
+static void compile_program(shader_t *shader);
 
 shader_t *shader_create_lower(shader_params_t params) {
 	shader_t *shader = malloc(sizeof(*shader));
@@ -68,12 +68,12 @@ void shader_destroy(shader_t *shader) {
 	free(shader);
 }
 
-void attach_source(shader_t *shader, const char *filename, shader_types_e type) {
+static void attach_source(shader_t *shader, const char *filename, shader_types_e type) {
 	shader->shaders[type] = load_shader(filename, GL_SHADER_TYPES[type]);
 	BIT_SET_TRUE(shader->attached, type);
 }
 
-void compile_program(shader_t *shader) {
+static void compile_program(shader_t *shader) {
 	for (int i = 0; i < NUM_SHADER_TYPES; ++i)
 		if (BIT_GET(shader->attached, i))
 			GL(glAttachShader(shader->program, shader->shaders[i]));
@@ -85,7 +85,7 @@ void compile_program(shader_t *shader) {
 	check_shader(shader->program, GL_VALIDATE_STATUS, true, "program validation failed");
 }
 
-GLuint load_shader(const char *filename, GLenum shader_type) {
+static GLuint load_shader(const char *filename, GLenum shader_type) {
 	GLuint shader;
 	const char * const text = load_text_file(filename);
 	GLint source_length = strlen(text);
@@ -102,7 +102,7 @@ GLuint load_shader(const char *filename, GLenum shader_type) {
 	return shader;
 }
 
-void check_shader(GLuint handle, GLuint flags, bool is_program, const char *msg) {
+static void check_shader(GLuint handle, GLuint flags, bool is_program, const char *msg) {
 	GLint success = 0;
 	GLchar error[1024] = "";
 

@@ -68,7 +68,7 @@ void atlas_destruct(atlas_t *atlas) {
     free(atlas->refs);
 }
 
-int bin_compare(const void *a, const void *b) {
+static int bin_compare(const void *a, const void *b) {
 	atlas_packet_t *bina, *binb;
 
 	bina = *(atlas_packet_t **)a;
@@ -77,7 +77,7 @@ int bin_compare(const void *a, const void *b) {
 	return MAX(bina->pos[0], bina->pos[1]) - MAX(binb->pos[0], binb->pos[1]);
 }
 
-int atlas_add_lower(atlas_t *atlas, const char *name, texture_t *tex, bool sheet, vec2 cell_size) {
+static int atlas_add_lower(atlas_t *atlas, const char *name, texture_t *tex, bool sheet, vec2 cell_size) {
 	if (atlas->ctx == NULL)
 		ERROR("cannot add to batch atlas after it has been generated.\n");
 

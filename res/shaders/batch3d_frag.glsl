@@ -1,7 +1,5 @@
 #version 330 core
 
-//#define DEBUG_DEPTH
-
 #define M_PI 3.1415
 
 in vec2 v_tex_pos;
@@ -27,14 +25,19 @@ void main() {
 
     // find lighting value from normal and light_pos
     vec3 normal = normalize(texture(atlas, v_normal_tex_pos).rgb * 2.0 - 1.0);
-    vec3 light = vec3(dot(normal, normalize(light_pos)));
+    float light = dot(normal, normalize(light_pos));
 
     frag_color.rgb *= light;
 
     // pass depth values where texture alpha is not zero
     gl_FragDepth = mix(1.0, gl_FragCoord.z + depth_tex, frag_color.a);
 
-#ifdef DEBUG_DEPTH
+#if 0
+    // display depth for debugging
     frag_color = mix(vec4(vec3(gl_FragDepth), 1.0), frag_color, 0.0);
+#endif
+#if 0
+    // display lighting for debugging
+    frag_color = vec4(vec3(light), 1.0);
 #endif
 }
