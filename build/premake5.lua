@@ -1,17 +1,12 @@
 workspace "sdl-iso-project"
 	configurations { "debug", "release" }
 
-include "../external/ghh-lib"
+include "../external/libghh"
+include "../external/libghhgfx"
 include "../external/glad"
 include "../external/cJSON"
 
 project "iso"
-	if os.target() == "windows" then
-		makesettings "CC=gcc" -- mingw32-make sets CC=cc by default
-	else
-		links { "dl" }
-	end
-
 	kind "ConsoleApp"
 	language "C"
 	cdialect "c99"
@@ -22,7 +17,7 @@ project "iso"
 	floatingpoint "Fast"
 
 	links {
-		"m", "ghh", "glad", "cJSON", "SDL2"
+		"m", "ghh", "ghhgfx", "glad", "cJSON", "SDL2"
 	}
 
 	includedirs {
@@ -34,6 +29,12 @@ project "iso"
 		"../src/**.c",
 		"../src/**.h"
 	}
+
+	if os.target() == "windows" then
+		makesettings "CC=gcc" -- mingw32-make sets CC=cc by default
+	else
+		links { "dl" }
+	end
 
 	filter "configurations:debug"
 		defines { "DEBUG" }

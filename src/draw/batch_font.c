@@ -5,10 +5,10 @@
 #include <ghh/memcheck.h>
 
 #include "batch_font.h"
-#include "../gfx/batcher.h"
-#include "../gfx/gfx.h"
-#include "../gfx/shader.h"
-#include "../gfx/atlas.h"
+#include <ghhgfx/batcher.h>
+#include <ghhgfx/gfx.h>
+#include <ghhgfx/shader.h>
+#include <ghhgfx/atlas.h>
 
 font_attrs_t default_attrs = {
     .color = {1.0, 1.0, 1.0, 1.0},

@@ -4,8 +4,6 @@
 #include <cglm/cglm.h>
 #include <stddef.h>
 
-#include "../gfx/texture.h"
-
 void batch3d_init(int batch_array_size);
 void batch3d_quit(void);
 

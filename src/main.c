@@ -4,8 +4,8 @@
 #include <SDL2/SDL.h>
 #include <ghh/vector.h>
 #include <ghh/memcheck.h>
+#include <ghhgfx/gfx.h>
 
-#include "gfx/gfx.h"
 #include "draw/draw.h"
 
 #ifdef _WIN32
@@ -81,7 +81,7 @@ bool process_events() {
 
 void init() {
     memcheck_init();
-    gfx_init("hello world!", 1280, 800);
+    gfx_init("clockwork universe :)", 1280, 800);
     draw_init();
 }
 

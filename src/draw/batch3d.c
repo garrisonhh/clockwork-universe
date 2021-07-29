@@ -1,10 +1,10 @@
 #include <ghh/memcheck.h>
 
 #include "batch3d.h"
-#include "../gfx/batcher.h"
-#include "../gfx/gfx.h"
-#include "../gfx/shader.h"
-#include "../gfx/atlas.h"
+#include <ghhgfx/batcher.h>
+#include <ghhgfx/gfx.h>
+#include <ghhgfx/shader.h>
+#include <ghhgfx/atlas.h>
 
 atlas_t atlas3d;
 shader_t *shader3d;

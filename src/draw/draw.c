@@ -1,10 +1,12 @@
+#include <stdlib.h>
 #include <ghh/gtimer.h>
 #include <ghh/utils.h>
 #include <ghh/memcheck.h>
+#include <ghhgfx/gfx.h>
 
 #include "batch_font.h"
 #include "batch3d.h"
-#include "../gfx/gfx.h"
+#include "../procgen/noise.h"
 
 int font_ref, block_ref, bdepth_ref, bnorm_ref;
 gtimer_t *fps_timer, *draw_timer, *logic_timer;
@@ -67,9 +69,15 @@ void draw_frame(vec3 test) {
 
     // we can get to 32,768 (2 ** 15) blocks before it's too much. I think it's a heap
     // memory thing. TODO memory optimization for batching, ig!
-    srand(0);
-    FOR_CUBE(pos[0], pos[1], pos[2], 0, 20) {
-        if (rand() % 2 < 1)
+    double dims = 32.0, value;
+    vec3 perlin_pos;
+
+    FOR_CUBE(pos[0], pos[1], pos[2], 0.0, dims) {
+        glm_vec3_scale(pos, 2.0 * (1.0 / dims), perlin_pos);
+
+        value = perlin3(perlin_pos) * ((pos[2] / (dims - 1.0)) - 0.5);
+
+        if (value > 0.1)
             batch3d_queue(block_ref, bdepth_ref, bnorm_ref, pos, (vec2){-16.0, -20.0});
     }
 
@@ -78,7 +86,7 @@ void draw_frame(vec3 test) {
         batch3d_queue(block_ref, bdepth_ref, bnorm_ref, temp, (vec2){-16.0, -20.0});
     }
 
-    batch3d_draw(1, 50.0, light_pos);
+    batch3d_draw(1, 50.0, (vec3){0.6, 0.8, 1.0});
 
     batch_font_queue(font_ref, topleft, fps_text, NULL);
     batch_font_draw();

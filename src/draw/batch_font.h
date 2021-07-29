@@ -1,10 +1,9 @@
 #ifndef BATCH_FONT_H
 #define BATCH_FONT_H
 
-#include <cglm/cglm.h>
 #include <stddef.h>
-
-#include "../gfx/texture.h"
+#include <cglm/cglm.h>
+#include <ghhgfx/texture.h>
 
 typedef struct font_attrs {
     vec4 color;
