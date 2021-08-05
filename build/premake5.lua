@@ -1,15 +1,15 @@
 workspace "sdl-iso-project"
 	configurations { "debug", "release" }
 
-include "../external/libghh"
 include "../external/libghhgfx"
+-- include "../external/libghh" -- included in libghhgfx
 include "../external/glad"
 include "../external/cJSON"
 
 project "iso"
 	kind "ConsoleApp"
 	language "C"
-	cdialect "c99"
+	cdialect "c11"
 	targetdir ".."
 
 	enablewarnings { "all" }

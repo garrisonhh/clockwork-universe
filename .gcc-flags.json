@@ -1,7 +1,14 @@
 {
   "execPath": "gcc",
-  "gccDefaultCFlags": "-Wall -std=c99 -pedantic-errors -c",
+  "gccDefaultCFlags": "-Wall -std=c11 -pedantic-errors -c",
   "gccErrorLimit": -1,
   "gccSuppressWarnings": true,
-  "gccIncludePaths" : "./external/,./external/libghh/include/,./external/libghhgfx/include/,./external/cglm/include/,./external/glad/include/,./external/cJSON"
+  "gccIncludePaths" :"
+    ./external/,
+    ./external/libghh/include/,
+    ./external/libghhgfx/include/,
+    ./external/cglm/include/,
+    ./external/glad/include/,
+    ./external/cJSON
+  "
 }

@@ -14,7 +14,7 @@
 #define MAIN main
 #endif
 
-vec3 pos = {20.0, 20.0, 20.0}, move = {0};
+v3 pos = {{20.0, 20.0, 20.0}}, move = {{0}};
 const uint8_t *keyboard = NULL;
 
 void init(void);
@@ -39,8 +39,6 @@ int MAIN(int argc, char **argv) {
 bool process_events() {
     SDL_Event event;
 
-    glm_vec3_copy((vec3){0}, move);
-
     // polled
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -61,20 +59,19 @@ bool process_events() {
 
     // state
     if (keyboard[SDL_SCANCODE_W])
-        glm_vec3_add(move, (vec3){-1.0, -1.0,  0.0}, move);
+        move = v3_add(v3_(-1.0, -1.0,  0.0), move);
     if (keyboard[SDL_SCANCODE_S])
-        glm_vec3_add(move, (vec3){ 1.0,  1.0,  0.0}, move);
+        move = v3_add(v3_( 1.0,  1.0,  0.0), move);
     if (keyboard[SDL_SCANCODE_A])
-        glm_vec3_add(move, (vec3){-1.0,  1.0,  0.0}, move);
+        move = v3_add(v3_(-1.0,  1.0,  0.0), move);
     if (keyboard[SDL_SCANCODE_D])
-        glm_vec3_add(move, (vec3){ 1.0, -1.0,  0.0}, move);
+        move = v3_add(v3_( 1.0, -1.0,  0.0), move);
     if (keyboard[SDL_SCANCODE_LSHIFT])
-        glm_vec3_add(move, (vec3){ 0.0,  0.0, -1.0}, move);
+        move = v3_add(v3_( 0.0,  0.0, -1.0), move);
     if (keyboard[SDL_SCANCODE_SPACE])
-        glm_vec3_add(move, (vec3){ 0.0,  0.0,  1.0}, move);
+        move = v3_add(v3_( 0.0,  0.0,  1.0), move);
 
-    glm_vec3_scale(move, 0.05, move);
-    glm_vec3_add(pos, move, pos);
+    move = v3_add(pos, v3_muls(move, 0.05));
 
     return true;
 }

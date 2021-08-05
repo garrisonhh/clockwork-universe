@@ -1,8 +1,8 @@
 #ifndef NOISE_H
 #define NOISE_H
 
-#include <cglm/cglm.h>
+#include <gglm/gglm.h>
 
-double perlin3(vec3 pos);
+double perlin3(v3 pos);
 
 #endif

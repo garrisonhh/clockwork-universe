@@ -7,6 +7,7 @@ build/obj
 build/bin
 build/*.make
 build/Makefile
+external/glad/obj
 
 # executables
 Iso

@@ -11,7 +11,7 @@
 #include <ghhgfx/atlas.h>
 
 font_attrs_t default_attrs = {
-    .color = {1.0, 1.0, 1.0, 1.0},
+    .color = {{1.0, 1.0, 1.0, 1.0}},
     .italicize = 0.0,
     .scale = 1.0,
     .waviness = 0.0,
@@ -33,7 +33,7 @@ void batch_font_init(int batch_array_size) {
     );
 
 	atlas_construct(&font_atlas);
-	atlas_add_sheet(&font_atlas, "font", "res/fonts/CGA8x8thick.png", (vec2){8.0, 8.0});
+	atlas_add_sheet(&font_atlas, "font", "res/fonts/CGA8x8thick.png", v2_fill(8.0));
 	atlas_generate(&font_atlas);
 }
 
@@ -44,15 +44,15 @@ void batch_font_quit() {
 }
 
 // internal only
-void batch_font_queue_lower(int ref_idx, vec2 pos, font_attrs_t *attrs) {
+void batch_font_queue_lower(int ref_idx, v2 pos, font_attrs_t *attrs) {
 	atlas_ref_t *ref = &font_atlas.refs[ref_idx];
 
     float *data[] = {
-        pos,
-        ref->pixel_size,
-        ref->pos,
-        ref->size,
-        attrs->color,
+        pos.ptr,
+        ref->pixel_size.ptr,
+        ref->pos.ptr,
+        ref->size.ptr,
+        attrs->color.ptr,
         &attrs->italicize,
         &attrs->scale,
         &attrs->waviness
@@ -61,8 +61,8 @@ void batch_font_queue_lower(int ref_idx, vec2 pos, font_attrs_t *attrs) {
     batcher_queue(font_batcher, data);
 }
 
-void batch_font_queue(int font_idx, vec2 pos, const char *text, font_attrs_t *attrs) {
-    vec2 carriage = {0.0, 0.0}, text_pos;
+void batch_font_queue(int font_idx, v2 pos, const char *text, font_attrs_t *attrs) {
+    v2 carriage = v2_ZERO;
 	int ref_idx;
 
     if (attrs == NULL)
@@ -72,13 +72,12 @@ void batch_font_queue(int font_idx, vec2 pos, const char *text, font_attrs_t *at
         ref_idx = font_idx + *text;
 
         if (*text == '\n') {
-            carriage[0] = 0.0;
-            carriage[1] += (font_atlas.refs[ref_idx].pixel_size[1] + 1.0) * attrs->scale;
+            carriage.x = 0.0;
+            carriage.y += (font_atlas.refs[ref_idx].pixel_size.y + 1.0) * attrs->scale;
         } else {
-            glm_vec2_add(pos, carriage, text_pos);
-            batch_font_queue_lower(ref_idx, text_pos, attrs);
+            batch_font_queue_lower(ref_idx, v2_add(pos, carriage), attrs);
 
-            carriage[0] += (font_atlas.refs[ref_idx].pixel_size[0] + 1.0) * attrs->scale;
+            carriage.x += (font_atlas.refs[ref_idx].pixel_size.x + 1.0) * attrs->scale;
         }
 
         ++text;
@@ -86,23 +85,22 @@ void batch_font_queue(int font_idx, vec2 pos, const char *text, font_attrs_t *at
 }
 
 void batch_font_draw() {
-	vec2 disp_size, camera;
-    float time;
-
     shader_bind(font_shader);
 
 	// pass in uniforms
-	gfx_get_camera(camera);
-	gfx_get_size(disp_size);
-    time = fmod(timeit_get_time(), 1000000.0);
-
-	GL(glUniform2fv(shader_uniform_location(font_shader, "camera"), 1, camera));
+	GL(glUniform2fv(
+        shader_uniform_location(font_shader, "camera"),
+        1, gfx_get_camera().ptr
+    ));
 	GL(glUniform2fv(
         shader_uniform_location(font_shader, "screen_size"),
-        1, disp_size
+        1, gfx_get_size().ptr
     ));
 
-	GL(glUniform1f(shader_uniform_location(font_shader, "t"), time));
+	GL(glUniform1f(
+        shader_uniform_location(font_shader, "t"),
+        fmod(timeit_get_time(), 1000000.0)
+    ));
 
 	texture_bind(font_atlas.texture, 0);
 	GL(glUniform1i(shader_uniform_location(font_shader, "font_atlas"), 0));

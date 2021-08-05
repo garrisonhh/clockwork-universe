@@ -36,20 +36,14 @@ void draw_quit() {
     batch_font_quit();
 }
 
-void draw_frame(vec3 test) {
-    float fps;
-    char fps_text[100];
-    vec3 pos, temp, light_pos;
-    vec2 topleft;
-
-    gfx_get_size(topleft);
-    glm_vec2_scale(topleft, -0.5, topleft);
-
-    glm_vec3_sub(test, (vec3){10.0, 10.0, 10.0}, light_pos);
+void draw_frame(v3 test) {
+    v3 light_pos = v3_sub(test, v3_fill(10.0));
+    v2 topleft = v2_muls(gfx_get_size(), -0.5);
 
     // fps + text
     gtimer_tick(fps_timer);
-    fps = gtimer_get_fps(fps_timer);
+    float fps = gtimer_get_fps(fps_timer);
+    char fps_text[100];
 
     sprintf(
         fps_text,
@@ -57,7 +51,7 @@ void draw_frame(vec3 test) {
         fps,
         (fps * gtimer_get_avg_tick(draw_timer)) * 100.0,
         (fps * gtimer_get_avg_tick(logic_timer)) * 100.0,
-        test[0], test[1], test[2]
+        v3_EXPAND(test)
     );
 
     // draw
@@ -70,30 +64,31 @@ void draw_frame(vec3 test) {
     // we can get to 32,768 (2 ** 15) blocks before it's too much. I think it's a heap
     // memory thing. TODO memory optimization for batching, ig!
     double dims = 32.0, value;
-    vec3 perlin_pos;
+    v3 pos;
 
-    FOR_CUBE(pos[0], pos[1], pos[2], 0.0, dims) {
-        glm_vec3_scale(pos, 2.0 * (1.0 / dims), perlin_pos);
-
-        value = perlin3(perlin_pos) * ((pos[2] / (dims - 1.0)) - 0.5);
+    FOR_CUBE(pos.x, pos.y, pos.z, 0.0, dims) {
+        value = perlin3(v3_muls(pos, 2.0 * (1.0 / dims)));
+        value *= ((pos.y / (dims - 1.0)) - 0.5);
 
         if (value > 0.1)
-            batch3d_queue(block_ref, bdepth_ref, bnorm_ref, pos, (vec2){-16.0, -20.0});
+            batch3d_queue(block_ref, bdepth_ref, bnorm_ref, pos, v2_(-16.0, -20.0));
     }
 
-    FOR_CUBE(pos[0], pos[1], pos[2], 0, 3) {
-        glm_vec3_add(pos, test, temp);
-        batch3d_queue(block_ref, bdepth_ref, bnorm_ref, temp, (vec2){-16.0, -20.0});
+    FOR_CUBE(pos.x, pos.y, pos.z, 0, 3) {
+        batch3d_queue(
+            block_ref, bdepth_ref, bnorm_ref,
+            v3_add(pos, test), v2_(-16.0, -20.0)
+        );
     }
 
-    batch3d_draw(1, 50.0, (vec3){0.6, 0.8, 1.0});
+    batch3d_draw(1, 50.0, v3_(0.6, 0.8, 1.0));
 
     batch_font_queue(font_ref, topleft, fps_text, NULL);
     batch_font_draw();
 
     gtimer_tick(draw_timer);
 
-    gfx_flip(); // this is where vsync happens, not included in frametimes
+    gfx_flip(); // this is where vsync happens (I think), not included in frametimes
 
     gtimer_tick(logic_timer);
     gtimer_pop_tick(logic_timer); // pops draw tick time

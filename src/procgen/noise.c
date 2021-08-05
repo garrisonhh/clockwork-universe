@@ -27,19 +27,19 @@ static const uint8_t perm_table[] = {
     0x4F, 0x1D, 0x73, 0x67, 0x8E, 0x92, 0x34, 0x30, 0x59, 0x36, 0x79, 0xD4, 0x7A, 0x3C, 0x1C, 0x2A
 };
 
-static const vec3 gradients3[] = {
-    { 0,  1,  1},
-    { 0,  1, -1},
-    { 0, -1,  1},
-    { 0, -1, -1},
-    { 1,  1,  0},
-    { 1, -1,  0},
-    {-1,  1,  0},
-    {-1, -1,  0},
-    { 1,  0,  1},
-    { 1,  0, -1},
-    {-1,  0,  1},
-    {-1,  0, -1}
+static const v3 gradients3[] = {
+    {{ 0,  1,  1}},
+    {{ 0,  1, -1}},
+    {{ 0, -1,  1}},
+    {{ 0, -1, -1}},
+    {{ 1,  1,  0}},
+    {{ 1, -1,  0}},
+    {{-1,  1,  0}},
+    {{-1, -1,  0}},
+    {{ 1,  0,  1}},
+    {{ 1,  0, -1}},
+    {{-1,  0,  1}},
+    {{-1,  0, -1}}
 };
 
 static const int corners3[8][3] = {
@@ -72,16 +72,16 @@ double smootherstep(double edge0, double edge1, double x) {
     return x * x * x * (x * (x * 6 - 15) + 10);
 }
 
-double perlin3(vec3 pos) {
+double perlin3(v3 pos) {
     int i, j;
 
     // get coordinates of cell and within cell
-    vec3 cell_pos;
+    v3 cell_pos;
     int grid_cell[3];
 
     for (i = 0; i < 3; ++i) {
-        grid_cell[i] = (int)pos[i];
-        cell_pos[i] = pos[i] - (double)grid_cell[i];
+        grid_cell[i] = (int)pos.ptr[i];
+        cell_pos.ptr[i] = pos.ptr[i] - (double)grid_cell[i];
     }
 
     // calculate gradient indices using perm_table as a hash function
@@ -98,24 +98,24 @@ double perlin3(vec3 pos) {
 
     // calculate noise dots from each corner
     double values[8];
-    vec3 relative_pos;
+    v3 relative_pos;
 
     for (i = 0; i < 8; ++i) {
         for (j = 0; j < 3; ++j)
-            relative_pos[j] = cell_pos[j] - (double)corners3[i][j];
+            relative_pos.ptr[j] = cell_pos.ptr[j] - (double)corners3[i][j];
 
-        values[i] = glm_vec3_dot((float *)gradients3[grid_indices[i]], relative_pos);
+        values[i] = v3_dot(gradients3[grid_indices[i]], relative_pos);
     }
 
     // smooth and lerp
     for (i = 0; i < 3; ++i)
-        cell_pos[i] = smootherstep(0.0, 1.0, cell_pos[i]);
+        cell_pos.ptr[i] = smootherstep(0.0, 1.0, cell_pos.ptr[i]);
 
     for (i = 0; i < 4; ++i)
-        values[i] = LERP(cell_pos[0], values[i], values[i + 4]);
+        values[i] = LERP(cell_pos.x, values[i], values[i + 4]);
 
     for (i = 0; i < 2; ++i)
-        values[i] = LERP(cell_pos[1], values[i], values[i + 2]);
+        values[i] = LERP(cell_pos.y, values[i], values[i + 2]);
 
-    return LERP(cell_pos[2], values[0], values[1]);
+    return LERP(cell_pos.z, values[0], values[1]);
 }

@@ -34,36 +34,35 @@ void batch3d_quit() {
 	batcher_destroy(batcher3d);
 }
 
-void batch3d_queue(int ref_idx, int depth_idx, int normal_idx, vec3 pos, vec2 offset) {
+void batch3d_queue(int ref_idx, int depth_idx, int normal_idx, v3 pos, v2 offset) {
     atlas_ref_t *ref = &atlas3d.refs[ref_idx];
 
     float *data[] = {
-        pos,             // draw_pos
-        ref->pixel_size, // draw_size
-        offset,          // draw_offset
-        ref->pos,        // tex_pos
-        atlas3d.refs[depth_idx].pos,  // depth_tex_pos
-        atlas3d.refs[normal_idx].pos, // normal_tex_pos
-        ref->size        // tex_size
+        pos.ptr,             // draw_pos
+        ref->pixel_size.ptr, // draw_size
+        offset.ptr,          // draw_offset
+        ref->pos.ptr,        // tex_pos
+        atlas3d.refs[depth_idx].pos.ptr,  // depth_tex_pos
+        atlas3d.refs[normal_idx].pos.ptr, // normal_tex_pos
+        ref->size.ptr        // tex_size
     };
 
     batcher_queue(batcher3d, data);
 }
 
-void batch3d_draw(int scale, float render_dist, vec3 light_pos) {
-	vec2 disp_size, camera;
-
+void batch3d_draw(int scale, float render_dist, v3 light_pos) {
 	shader_bind(shader3d);
 
 	// pass in uniforms
-	gfx_get_camera(camera);
-	gfx_get_size(disp_size);
-
-	GL(glUniform2fv(shader_uniform_location(shader3d, "camera"), 1, camera));
-    GL(glUniform2fv(shader_uniform_location(shader3d, "screen_size"), 1, disp_size));
+	GL(glUniform2fv(
+        shader_uniform_location(shader3d, "camera"), 1, gfx_get_camera().ptr)
+    );
+    GL(glUniform2fv(
+        shader_uniform_location(shader3d, "screen_size"), 1, gfx_get_size().ptr)
+    );
     GL(glUniform1f(shader_uniform_location(shader3d, "scale"), (float)scale));
 	GL(glUniform1f(shader_uniform_location(shader3d, "render_dist"), render_dist));
-    GL(glUniform3fv(shader_uniform_location(shader3d, "light_pos"), 1, light_pos));
+    GL(glUniform3fv(shader_uniform_location(shader3d, "light_pos"), 1, light_pos.ptr));
 
 	texture_bind(atlas3d.texture, 0);
 	GL(glUniform1i(shader_uniform_location(shader3d, "atlas3d"), 0));

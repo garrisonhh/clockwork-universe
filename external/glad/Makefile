@@ -19,10 +19,10 @@ endif
 # #############################################
 
 RESCOMP = windres
-TARGETDIR = bin/glad
+TARGETDIR = ../libghhgfx/external/glad/bin/glad
 TARGET = $(TARGETDIR)/libglad.a
 DEFINES +=
-INCLUDES += -Iinclude
+INCLUDES += -Iinclude -I../libghhgfx/external/glad/include
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
@@ -37,13 +37,13 @@ define POSTBUILDCMDS
 endef
 
 ifeq ($(config),debug)
-OBJDIR = obj/glad/debug
+OBJDIR = ../libghhgfx/external/glad/obj/glad/debug
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -g -w -std=c99
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -g -w
 ALL_LDFLAGS += $(LDFLAGS)
 
 else ifeq ($(config),release)
-OBJDIR = obj/glad/release
+OBJDIR = ../libghhgfx/external/glad/obj/glad/release
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -O2 -w -std=c99
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -O2 -w
 ALL_LDFLAGS += $(LDFLAGS) -s
@@ -61,7 +61,9 @@ GENERATED :=
 OBJECTS :=
 
 GENERATED += $(OBJDIR)/glad.o
+GENERATED += $(OBJDIR)/glad1.o
 OBJECTS += $(OBJDIR)/glad.o
+OBJECTS += $(OBJDIR)/glad1.o
 
 # Rules
 # #############################################
@@ -125,7 +127,10 @@ endif
 # File Rules
 # #############################################
 
-$(OBJDIR)/glad.o: src/glad.c
+$(OBJDIR)/glad.o: ../libghhgfx/external/glad/src/glad.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/glad1.o: src/glad.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
