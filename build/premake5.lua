@@ -2,7 +2,7 @@ workspace "sdl-iso-project"
 	configurations { "debug", "release" }
 
 include "../external/libghhgfx"
--- include "../external/libghh" -- included in libghhgfx
+-- include "../external/libghh" -- included in libghhgfx TODO figure out why tf premake compiles this twice?
 include "../external/glad"
 include "../external/cJSON"
 
@@ -12,9 +12,9 @@ project "iso"
 	cdialect "c11"
 	targetdir ".."
 
-	enablewarnings { "all" }
-	buildoptions { "-pedantic-errors" }
+	enablewarnings "all"
 	floatingpoint "Fast"
+	buildoptions "-pedantic-errors"
 
 	links {
 		"m", "ghh", "ghhgfx", "glad", "cJSON", "SDL2"

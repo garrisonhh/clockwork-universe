@@ -1,0 +1,15 @@
+[submodule "external/gglm"]
+	path = external/gglm
+	url = https://github.com/garrisonhh/gglm
+[submodule "external/libghh"]
+	path = external/libghh
+	url = https://github.com/garrisonhh/libghh
+[submodule "external/libghhgfx"]
+	path = external/libghhgfx
+	url = https://github.com/garrisonhh/libghhgfx
+[submodule "external/glad"]
+	path = external/glad
+	url = https://github.com/garrisonhh/glad
+[submodule "external/cJSON"]
+	path = external/cJSON
+	url = https://github.com/garrisonhh/cJSON
