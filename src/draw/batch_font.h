@@ -10,7 +10,7 @@ typedef struct font_attrs {
     float italicize, scale, waviness;
 } font_attrs_t;
 
-void batch_font_init(int batch_array_size);
+void batch_font_init(void);
 void batch_font_quit(void);
 
 // pos is relative to range [-1.0, 1.0] screen x, y values

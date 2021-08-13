@@ -4,7 +4,7 @@
 #include <gglm/gglm.h>
 #include <stddef.h>
 
-void batch3d_init(int batch_array_size);
+void batch3d_init(void);
 void batch3d_quit(void);
 
 // pos is 3d position, offset is pixel offset

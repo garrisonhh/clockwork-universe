@@ -10,7 +10,7 @@ atlas_t atlas3d;
 shader_t *shader3d;
 batcher_t *batcher3d;
 
-void batch3d_init(int batch_array_size) {
+void batch3d_init(void) {
     const size_t buffers[] = {3, 2, 2, 2, 2, 2, 2};
     const size_t num_buffers = ARRAY_LEN(buffers);
 

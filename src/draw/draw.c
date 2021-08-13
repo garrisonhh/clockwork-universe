@@ -13,8 +13,8 @@ gtimer_t *fps_timer, *draw_timer, *logic_timer;
 
 void draw_init() {
     // sub inits
-    batch_font_init(1024);
-    batch3d_init(256);
+    batch_font_init();
+    batch3d_init();
 
     fps_timer = gtimer_create(120);
     draw_timer = gtimer_create(120);
@@ -37,7 +37,6 @@ void draw_quit() {
 }
 
 void draw_frame(v3 test) {
-    v3 light_pos = v3_sub(test, v3_fill(10.0));
     v2 topleft = v2_muls(gfx_get_size(), -0.5);
 
     // fps + text
