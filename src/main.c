@@ -58,6 +58,8 @@ bool process_events() {
     }
 
     // state
+    move = v3_ZERO;
+
     if (keyboard[SDL_SCANCODE_W])
         move = v3_add(v3_(-1.0, -1.0,  0.0), move);
     if (keyboard[SDL_SCANCODE_S])
@@ -67,18 +69,18 @@ bool process_events() {
     if (keyboard[SDL_SCANCODE_D])
         move = v3_add(v3_( 1.0, -1.0,  0.0), move);
     if (keyboard[SDL_SCANCODE_LSHIFT])
-        move = v3_add(v3_( 0.0,  0.0, -1.0), move);
+        --move.z;
     if (keyboard[SDL_SCANCODE_SPACE])
-        move = v3_add(v3_( 0.0,  0.0,  1.0), move);
+        ++move.z;
 
-    move = v3_add(pos, v3_muls(move, 0.05));
+    pos = v3_add(pos, v3_muls(move, 0.05));
 
     return true;
 }
 
 void init() {
     memcheck_init();
-    gfx_init("clockwork universe :)", 1280, 800);
+    gfx_init("clockwork universe :)", 0, 0);
     draw_init();
 }
 
