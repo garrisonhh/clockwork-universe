@@ -6,7 +6,7 @@
 
 #include "batch_font.h"
 #include "batch3d.h"
-#include "../procgen/noise.h"
+#include "../algo/noise.h"
 
 int font_ref, block_ref, bdepth_ref, bnorm_ref;
 gtimer_t *fps_timer, *draw_timer, *logic_timer;
